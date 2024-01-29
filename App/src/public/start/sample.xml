@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+    <name>Account-Store</name>
+    <group>hashed-potato.com</group>
+</application>
+<meta>
+    <version>1</version>
+    <devicefileid>63b2abce-2ce8-4c44-8a83-659b6e1120fd</devicefileid>
+</meta>
+<data>
+    <service>
+        <id>sample.service.id</id>
+        <account>
+            <uid>myloginid</uid>
+            <password>abc1234</password>
+        </account>
+    </service>
+</data>

@@ -1,5 +1,8 @@
-extends layout
+doctype html
+html
+  include _head.jade
 
-block content
-  h1= title
-  p Welcome to #{title}
+body 
+  include _header.jade
+  main#main
+    h1 こんにちは！

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <script src="../lib/fxbuilder.min.js"></script>
+    <script src="../lib/fxparser.min.js"></script>
+    
+</head>
+<body>
+    <header></header>
+
+    <main>
+        <nav>
+            <ol>
+                <li>ファイル作成</li>
+            </ol>
+        </nav>
+
+        <section>
+            <h1>ファイル作成</h1>
+            <div class="description">
+                ファイルを作成する
+            </div>
+            <div id="not-supported">
+                The
+                <a href="https://wicg.github.io/file-system-access/" target="_blank">File System Access API</a>
+                is <b>not</b> supported in this browser yet, and Text Editor is running
+                in legacy mode. In legacy mode, the file modified indicators are not shown.
+            </div>
+            <button id="createFile">作成する</button>
+            </select>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="../inline-scripts/myEvent.js" inline></script>
+    <script src="../inline-scripts/idb-keyval-iife.js" inline></script>
+    <script src="../inline-scripts/fs-helper.js" inline></script>
+    <script src="../inline-scripts/security.js" inline></script>
+    <script src="../inline-scripts/file-master.js" inline></script>
+    <script src="./app.js"></script>
+
+</body>
+</html>

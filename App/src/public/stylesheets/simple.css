@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300&display=swap');
+
+:root {
+    --total-width: 1025px;
+    /* 全体幅 */
+    --header-bgcolor: rgb(42, 42, 42);
+    /* ヘッダー背景色 */
+    --icon-color: rgb(234, 234, 234);
+    /* アイコン文字色 */
+    --font-color-w: rgb(234, 234, 234);
+    /* 文字色　白 */
+    --font-color-w-hover: rgb(166, 166, 166);
+    /* ホバー時　文字色　白 */
+    --accent-color: #78bd78;
+    --blue: rgb(5, 94, 211);
+    --lightblue: rgb(84, 156, 250);
+    --black: #000;
+    --gray: rgb(42, 42, 42);
+    --white: rgb(255, 255, 255);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    zoom: 1;
+    box-sizing: content-box;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 18px;
+}
+
+/* COMMONS */
+.disabled {
+    display: none;
+}
+.unmargin {
+    margin: 0;
+}
+.hover-highlight {
+    background-color: white;
+}
+.hover-highlight:hover {
+    cursor: pointer;
+    background-color: rgba(226, 226, 226, 0.702);
+    /* transition: 0.6s; */
+    /* horizontal 2px; vertical 4px; blur(ぼかし半径) 5px; shadow color gray */
+    box-shadow: 1px 1px 3px grey;
+}
+
+/* BODY */
+body {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* SECTION */
+section {
+    display: inline-block;
+    max-width: 400px;
+    width: 80%;
+    padding: 15px 30px;
+    margin: 15px 0;
+    border: 1px solid rgb(0, 0, 0, 0.38);
+    border-radius: 8px;
+    user-select: none; /* 選択を禁止する */
+}
+section h1 {
+    text-align: center;
+    position: relative;
+    margin: 30px 0;
+}
+section p.comment {
+    text-align: center;
+    border: 1px solid var(--black);
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 3px 0;
+}
+
+/* SECTION - compact */
+section, section h1, section h1 img, section h1 p {
+    transition: 0.3s;
+}
+section.compact {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+section.compact h1 {
+    margin: 0;
+    text-align: left;
+}
+section h1 img {
+    height: 30px;
+    vertical-align: middle;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+section h1 p {
+    font-size: 1.6rem;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
+/* SECTION - Footer */
+section footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 30px;
+}
+
+section footer input[type=button]:hover,
+section footer input[type=submit]:hover {
+    cursor: pointer;
+}
+
+section footer input[type=submit].high-light {
+    border: 0;
+    border-radius: 5px;
+    background-color: var(--blue);
+    color: #FFF;
+    padding: 5px 20px;
+    font-size: .85rem;
+}
+section footer input[type=button].low-light {
+    border: 0;
+    color: var(--blue);
+    background-color: inherit;
+    font-size: .88rem;
+}
+section footer input[type=button].low-light:hover {
+    color: var(--lightblue);
+    transition: 0.4s;
+}
+section footer input[type=submit].high-light:hover {
+    background-color: var(--lightblue);
+    transition: 0.4s;
+}
+
+
+/* FORM */
+form div {
+    font-size: 1.5rem;
+    display: block;
+    margin-top: 20px;
+}
+
+form div *:not(span) {
+    display: block;
+}
+
+form div label {
+    font-weight: bold;
+}
+form div:first-child label {
+    margin-top: 0;
+}
+
+/* FORM - input */
+form div input[type=submit] {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: var(--header-bgcolor);
+    color: var(--font-color-w);
+}
+
+form div.switch {
+    margin: 5px 0;
+}
+form div.switch label {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+form div.switch label input[type=checkbox] {
+    transform: scale(1.8);
+    width: 30px;
+}
+form div.switch label *:hover {
+    cursor: pointer;
+}
+
+/* INPUT [TEXT] */
+input[type=text], input[type=password]{
+    color: #000;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 3px 6px;
+    width: calc(100% - 12px - 4px);
+    border: 2px solid rgb(0, 0, 0, 0.38);
+}
+
+input[type=text]:focus, input[type=password]:focus {
+    border: 2px solid rgb(5, 94, 211);
+    border-radius: 4px;
+    outline: 0;
+}
+input[type=text]:focus::-webkit-input-placeholder,
+input[type=password]:focus::-webkit-input-placeholder { color: transparent; }
+input[type=text]:focus::-moz-placeholder,
+input[type=password]:focus::-moz-placeholder { color: transparent; }
+input[type=text]:focus::-ms-input-placeholder,
+input[type=password]:focus::-ms-input-placeholder { color: transparent; }
+input[type=text]:focus::placeholder,
+input[type=password]:focus::placeholder { color: transparent; }
+
+input[type=text]::placeholder,
+input[type=password]::placeholder {
+    font-size: 0.9rem;
+    color: rgb(49, 49, 49);
+    font-weight: lighter;
+}
+
+
+/* ERROR MESSAGE */
+p.errmsg {
+    display: none;
+    color: red;
+    position: relative;
+    padding: 0 15px;
+}
+p.errmsg::before {
+    content:"";
+    display:inline-block;
+    width: 4px;
+    height: 30px;
+    color: red;
+    background-color:red;
+    position: absolute;
+    top: -2px;
+    left: -5px;
+}

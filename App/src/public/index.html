@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ログインデータを管理する | hashed-potato</title>
+  <meta name="description" content="オンライン上のログイン情報を管理する" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <link rel="apple-touch-icon" href="images/favicon.png" />
+  <link rel="stylesheet" type="text/css" href="stylesheets/reset.css" />
+  <link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+  <!-- <script src="/js/main.js" defer></script> -->
+</head>
+
+<body>
+  <!-- Templates -->
+  <!-- ** ポップアップウィンドウ **  -->
+  <template id="template-popup-window">
+    <div class="popup-window">
+      <div class="popup-header">
+        <!-- <p class="popup-header-title">タイトル</p> -->
+      </div>
+      <div class="popup-content">
+        <!-- <p>テキストテキストテキストテキストテキストテキストテキスト</p> -->
+      </div>
+      <div class="popup-footer">
+        <!-- <input type="button" value="キャンセル" class="popup-window-btn-cancel"> -->
+        <!-- <input type="submit" value="OK" class="main-btn popup-window-btn-ok"> -->
+      </div>
+    </div>
+  </template>
+
+  <!-- ** 通知ウィンドウ ** -->
+  <template id="template-notification">
+    <div class="notification nt-green hidden">
+      <p class="notification-status-message">成功しました</p>
+      <div class="notification-close">
+        <input id="switch" type="checkbox">
+        <label class="button" for="switch">
+          <span class="icon"></span>
+          <span class="close">close</span>
+        </label>
+      </div>
+    </div>
+  </template>
+
+  <!-- // Templates -->
+  <header>
+    <div class="h-wrapper">
+      <div class="h-logo">
+        <a href="/">
+          <span class="logo-icon"></span>
+          <span class="logo-large-title">hashed potato</span>
+          <span class="logo-small-title">It will be okay</span>
+        </a>
+      </div>
+      <nav class="h-nav-sub">
+        <ul>
+          <li><a href="/#about">ポテトシステム</a></li>
+          <li><a href="/#usage">使い方</a></li>
+          <li><a href="/start">はじめる</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <div id="template-not-supported">
+    <h1>このブラウザには対応していません</h1>
+  </div>
+
+  <template id="TopView">
+    <h1>はじめる</h1>
+    <a href="start">はじめる</a>
+  </template>
+
+  <template id="StartView">
+    <h1>StartView</h1>
+  </template>
+
+  <template id="LinkView">
+    <h1>LinkView</h1>
+  </template>
+
+  <footer></footer>
+
+  <script src="./index.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (app.isTemplateAccess) {
+        document.querySelector('#template-not-supported').classList.add('disabled');
+        app.onload();
+      }
+    });
+  </script>
+
+  <style>
+    /* keyvisual */
+    div#keyvisual {
+      height: 40vh;
+      min-height: 400px;
+      position: relative;
+      /* background-image: url("../logos/kv.jpg"); */
+      background-size: cover;
+      user-select: none;
+    }
+
+    div#keyvisual h1 {
+      position: absolute;
+      display: block;
+      text-align: center;
+      width: 100%;
+      font-size: 2rem;
+      top: 140px;
+    }
+
+    div#keyvisual p {
+      position: absolute;
+      display: block;
+      top: 280px;
+      width: 100%;
+      text-align: center;
+    }
+
+    div#keyvisual p a {
+      font-size: 1.1rem;
+      letter-spacing: .22px;
+      display: inline-block;
+      border: 1px solid var(--gray);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    div#keyvisual p a:hover {
+      border: 1px solid rgb(120, 120, 120);
+      color: rgb(120, 120, 120);
+      text-decoration: none;
+      transition: 0.4s;
+    }
+
+    figcaption {
+      position: relative;
+      padding: 0 0 0 18px;
+    }
+
+    figcaption::before {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 0;
+      border: 6px solid transparent;
+      border-bottom: 7px solid black;
+    }
+
+    .emphasis {
+      color: red;
+      font-weight: bold;
+    }
+
+    .key::before,
+    .key::after,
+    .asset::before,
+    .asset::after,
+    .vault::before,
+    .vault::after {
+      content: "\"";
+    }
+
+    .key {
+      /* 鍵 */
+      color: deepskyblue;
+      margin: 0 3px;
+    }
+
+    .asset {
+      /* 資産 */
+      color: rgb(255, 42, 166);
+      margin: 0 3px;
+    }
+
+    .vault {
+      /* ロッカー */
+      color: darkgreen;
+      margin: 0 3px;
+    }
+  </style>
+</body>

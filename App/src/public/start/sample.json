@@ -1,0 +1,12 @@
+[
+    {
+        "service_name": "abc service",
+        "user_id": "user001",
+        "password": "password.xyz"
+    },
+    {
+        "service_name": "foo service",
+        "user_id": "user999",
+        "password": "userpass"
+    }
+]

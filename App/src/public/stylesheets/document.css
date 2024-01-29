@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300&display=swap');
+
+:root {
+    --header-bgcolor: rgb(42, 42, 42);
+    /* ヘッダー背景色 */
+    --icon-color: rgb(234, 234, 234);
+    /* アイコン文字色 */
+    --font-color-w: rgb(234, 234, 234);
+    /* 文字色　白 */
+    --font-color-w-hover: rgb(166, 166, 166);
+    /* ホバー時　文字色　白 */
+    --accent-color: #78bd78;
+    --blue: rgb(5, 94, 211);
+    --lightblue: rgb(84, 156, 250);
+    --black: #000;
+    --gray: rgb(42, 42, 42);
+    --lightgray: rgb(150, 150, 150, 0.7);
+    --white: rgb(255, 255, 255);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    zoom: 1;
+    box-sizing: content-box;
+}
+
+html {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 100%;
+    line-height: 1.5; 
+}
+
+h1,h2,h3,h4,h5,h6 { margin-bottom : 24px}
+/* 垂直方向のマージンを統一 */
+ 
+h1 {
+    font-size : 48px; 
+    line-height : 1;    
+    /* 要素の高さ：48px（要素を配置するときの高さの基準の2倍）*/
+}
+ 
+h2 {
+    font-size : 36px;
+    line-height : 1.3333;   
+    /* 要素の高さ：48px（要素を配置するときの高さの基準の2倍） */
+}
+h3 {
+    font-size : 24px;
+    line-height : 1;    
+    /* 要素の高さ：24px（要素を配置するときの高さの基準） */
+}
+hgroup h2,h4,h5,h6 {
+    font-size : 16px; 
+    line-height : 1.5;   
+    /* 要素の高さ：24px（要素を配置するときの高さの基準） */
+}
+
+hr {
+    border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    width: 100%;
+    margin: auto;
+    margin-bottom: 24px;
+}
+
+li { list-style: none; }
+li.list-style { list-style: square; }
+
+a { color: var(--blue); }
+a.white { color: gray; text-decoration: none; }
+a:hover { color: var(--lightblue); transition: 0.6s; text-decoration: none; }
+a.white:hover { color: var(--lightgray); transition: 0.6s; text-decoration: none; }
+
+
+
+@media screen and (max-width: 480px) {
+
+    /* SP */
+    main {
+        width: 95%;
+        min-height: 80vh;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+}
+
+@media screen and (min-width: 481px) {
+
+    /* PC */
+    main {
+        width: 100%;
+        margin-top: 24px;
+        margin-bottom: 24px;
+        position: relative;
+    }
+}
+
+section {
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.index-nav {
+    display: inline-block;
+    position: fixed;
+    width: 200px;
+    font-size: 1.4rem;
+}
+.index-list {
+    border-right: 1px solid black;
+    margin: 24px 12px;
+    padding: 0 12px;
+}
+.index-list ol {
+    padding: 0 12px;
+}
+.index-title {
+    font-weight: 600;
+}
+.index-row a {
+
+}
+
+.index-row * {
+    font-size: 1.0rem;
+}
+
+main > div {
+    display: inline-block;
+    width: calc(100% - 200px);
+    margin-left: 200px;
+}

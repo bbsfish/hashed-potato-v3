@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock - Service Generator</title>
+  <style>
+    * {
+        font-weight: 600;
+    }
+    form label {
+        display: inline-block;
+        width: 250px;
+    }
+    form div {
+        margin: 12px 0;
+    }
+    input, select {
+        width: 300px;
+        padding: 4px 6px;
+    }
+    #do_submit {
+        width: 600px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Service Generator</h1>
+  <form name="request_form">
+    <h2>Config</h2>
+    <div>
+      <label for="app_host">Host for Redirect URI</label>
+      <input type="text" name="app_host" placeholder="" value="">
+    </div>
+    <div>
+      <label for="app_post_target">Post target</label>
+      <input type="text" name="app_post_target" placeholder="" value="">
+    </div>
+    <div>
+      <label for="app_redirect_target">Redirect target</label>
+      <input type="text" name="app_redirect_target" placeholder="" value="">
+    </div>
+    <h2>Request</h2>
+    <div>
+      <label for="req_requester_id">Requester ID (Client ID)</label>
+      <input type="text" name="req_requester_id" placeholder="" value="">
+      <button id="generate_requester_id" type="button">生成</button>
+    </div>
+
+    <div>
+      <label for="req_type">Type</label>
+      <select name="req_type">
+        <option value="login_bridge">login_bridge</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="req_scope">Scope</label>
+      <select name="req_scope" multiple>
+        <option value="fullname">fullname</option>
+        <option value="nickname">nickname</option>
+        <option value="email">email</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="req_redirect_uri">Redirect URI</label>
+      <input type="text" name="req_redirect_uri" placeholder="example.host:3000" value="">
+    </div>
+
+    <div>
+        <button type="button" id="do_submit">サーバーに送信</button>
+    </div>
+
+  </form>
+
+  <script src="../gen-random-id.js"></script>
+  <script>
+    const form = document.forms["request_form"];
+
+    // Config
+    const config = {
+      host: window.location.host,
+      target: `http://${window.location.host}/agent/link/stock`,
+      redirect: `http://localhost:3000/link/`
+    }
+
+    // Fill config form
+    form.app_host.value = config.host;
+    form.app_post_target.value = config.target;
+    form.app_redirect_target.value = config.redirect;
+    
+    // When config is changed
+    form.app_host.addEventListener("change", (event) => {
+      config.host = form.app_host.value;
+      console.log("config.host", config.host);
+      updateReqRedirectUri();
+    });
+    form.app_post_target.addEventListener("change", (event) => {
+      config.target = form.app_post_target.value;
+      console.log("config.target", config.target);
+    });
+    form.app_redirect_target.addEventListener("change", (event) => {
+      config.redirect = form.app_redirect_target.value;
+      console.log("config.redirect", config.redirect);
+    });
+
+
+    // Redirect URI
+    function updateReqRedirectUri (){
+      const uri = `http://${config.host}/sample/service-generator/redirect.html`;
+      form.req_redirect_uri.value = uri;
+      console.log("form.req_redirect_uri update");
+    }
+
+    window.setTimeout(updateReqRedirectUri, 100);
+
+    // Requester ID
+    document.getElementById("generate_requester_id").addEventListener("click", (event) => {
+        event.preventDefault();
+        const now = new Date();
+        const newId = `${genRandomId()}-${location.hostname}-${now.getTime().toString().substring(6)}`;
+        form.req_requester_id.value = newId;
+    })
+
+    // Submit
+    let reception_id = "";
+
+    document.getElementById("do_submit").addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        const getSelectedValues = selectElement =>
+            Array.from( selectElement.selectedOptions , e=>e.value );
+
+        const requestBody = {
+            type: form.req_type.options[form.req_type.selectedIndex].value,
+            redirect_uri: form.req_redirect_uri.value,
+            requester_id: form.req_requester_id.value,
+            scope: getSelectedValues(form.req_scope),
+            self_request_auth: "temp_token",
+            self_request_auth_value: "123456"
+        }
+
+        if (requestBody.requester_id == "") {
+            return alert("requester_id is null");
+        }
+
+        console.log("送信内容: ", requestBody);
+
+        try {
+            const response = await fetch(config.target, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: JSON.stringify(requestBody)
+            });
+            if (!response.ok) { throw new Error("response is not ok"); }
+            const obj = await response.json();
+
+            reception_id = obj.reception_id;
+            alert("サーバーにリクエストが登録されました。受付ID: " + obj.reception_id);
+            alert("ユーザをＷｅｂアプリケーションに飛ばします。> " + config.redirect)
+            window.location.href = config.redirect + "?id=" + reception_id;
+            
+        } catch (error) {
+            console.error(error);
+        }
+    });
+    
+  </script>
+
+</body>
+
+</html>
