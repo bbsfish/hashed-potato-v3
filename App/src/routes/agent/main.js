@@ -5,8 +5,7 @@
 
 require('dotenv').config();
 const express = require('express');
-const router = express.Router();
-const crypto = require('crypto');
+const router = express.Router(); // eslint-disable-line new-cap
 const Firestore = require('@google-cloud/firestore');
 const firedb = new Firestore({
   projectId: 'univ-390010',
@@ -38,7 +37,7 @@ async function linkStock (req, res) {
   const dt = new Date();
   Object.assign(body, {
     requested_time: dt.getTime(),
-    expires_time: dt.getTime() + 1000*60*5, // 5 min *1000ms=1s
+    expires_time: dt.getTime() + 1000*60*5 // 5 min *1000ms=1s
   });
   const result = await firedb.collection('link_requests').add(body);
   console.log('result.id', result.id);
