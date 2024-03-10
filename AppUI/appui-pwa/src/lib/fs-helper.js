@@ -154,7 +154,7 @@ async function verifyPermission (fileHandle, withWrite) {
  * @return {Object}
  */
 async function getFileContent(fileHandle) {
-  if (await verifyPermission(fileHandle, true) === false) return;
+  if (verifyPermission(fileHandle, true) === false) return;
   const file = await fileHandle.getFile();
   const fileText = await readFile(file);
   return fileText;

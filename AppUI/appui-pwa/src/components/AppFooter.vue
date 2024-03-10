@@ -1,6 +1,7 @@
 <template>
-  <footer class="app-footer">
-    <div>Copyright</div>
+  <footer>
+    <div className="copyright">&copy;hashed-potato.mydns.jp</div>
+    <div className="note">システムは開発中です</div>
     <div v-if="isSupported() !== true" id='fsa-not-supported'>
       The
       <Link href='https://wicg.github.io/file-system-access/' target='_blank'>File System Access API</Link>
@@ -27,11 +28,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  footer.app-footer {
+  footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: black;
     color: white;
     * {
       color: white;
+    }
+    .copyright {
+      text-align: center;
+    }
+
+    .note {
+      text-align: center;
     }
   }
 </style>

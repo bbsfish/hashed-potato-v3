@@ -10,10 +10,16 @@ export default {
   props: ['label'],
   methods: {
     selectDeviceFile() {
-      // $emit に async/await は利用できない
       getFileHandle()
-        .then((fh) => this.$emit('pullFileHandle', fh))
-        .catch(() => this.$emit('pullFileHandle', null));
+        .then((fh) => {
+          this.$store.commit('files/add', fh);
+          this.$store.commit('user/file', fh);
+        })
+        // .then((fh) => {
+        //   this.$store.commit('user/file', fh);
+        //   this.$store.commit('files/pushFileList', fh);
+        // })
+        .catch(() => {});
     },
   },
 };

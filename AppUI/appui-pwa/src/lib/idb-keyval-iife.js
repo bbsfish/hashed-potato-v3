@@ -80,4 +80,4 @@ const idbKeyval = (function (exports) {
 
 }({}));
 
-export {idbKeyval}
+export default idbKeyval;

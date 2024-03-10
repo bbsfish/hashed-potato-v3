@@ -7,14 +7,23 @@ export default {
       alert: async ({
         message = 'This is alert.',
       }) => {
-        return window.alert(message);
+        return await window.alert(message);
       },
 
       confirm: async ({
         message = 'This is confirm. ok?',
       }) => {
-        return window.confirm(message);
-      }
+        return await window.confirm(message);
+      },
+
+      prompt: async ({
+        message = 'This is prompt',
+      }) => {
+        return new Promise((resolve, reject) => {
+          const input = window.prompt(message);
+          resolve(input);
+        });
+      },
 
     }
   },

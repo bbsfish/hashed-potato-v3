@@ -1,7 +1,9 @@
 <template>
   <div id='app'>
     <AppHeader />
-    <router-view></router-view>
+    <div className="main-wrp">
+      <router-view></router-view>
+    </div>
     <AppFooter />
   </div>
 </template>
@@ -16,3 +18,10 @@ export default {
   components: { AppHeader, AppFooter },
 };
 </script>
+
+<style lang="scss" scoped>
+  .main-wrp {
+    margin-top: 48px;
+    margin-bottom: 72px;
+  }
+</style>

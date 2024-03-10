@@ -1,39 +1,50 @@
 <template>
   <main>
-    <h2>Content Viewer</h2>
+    <AppMainHeader title="Content Viewer"/>
     <div>
+      <p>
+        ファイルの参照および編集ができます.
+      </p>
+      <div class="selected-file-name-view">
+        <span v-if='isFileSelected()'>
+          選択中のファイル: {{ fileName() }}
+        </span>
+        <span v-else>
+          ファイルが選択されていません
+        </span>
+      </div>
+      <div class="box">
+        <h3>ファイルを選択する</h3>
+        <div>
+          <RecentFilesWithSelectBox label='最近のファイル' />
+          <SelectDeviceFileButton label='ファイルを選択' />
+        </div>
+      </div>
+      <button v-if='isFileSelected()' @click='showContentData'>データを表示する</button>
+      <AddDataPrompt @pullInputData='addDataIntoFile' v-if='isFileSelected()'/>
+      <button v-if='isFileSelected()' @click="lockFile">ファイルに鍵をかける</button>
       <SetupTable
         :idata='convFromSecDataToArrangeSecData'
         :icolumns='arrangeSecDataColumn'
         />
-      <RecentFilesWithSelectBox ref='recentFiles' label='最近のファイル' />
-      <button @click='doTest'>do it</button>
-      <SelectDeviceFileButton label='表示するファイルを選択' @pullFileHandle='onGetNewFileHandle' />
-      <span>
-        表示中のファイル: {{fileName()}}
-      </span>
-      <button v-if='isFileSelected()' @click='showContentData'>データを表示する</button>
-      <AddDataPrompt @pullInputData='addDataIntoFile'/>
-      <EncyptDataPrompt @pullPassphrase='zipDeviceFile'/>
     </div>
   </main>
 </template>
 
 <script>
-import { shallowRef } from 'vue';
 import { ulid } from 'ulid';
 import AddDataPrompt from '@/components/AddDataPrompt.vue';
-import EncyptDataPrompt from '@/components/EncyptDataPrompt.vue';
 import SelectDeviceFileButton from '@/components/SelectDeviceFileButton.vue';
 import RecentFilesWithSelectBox from '@/components/RecentFilesWithSelectBox.vue';
 import SetupTable from '@/components/SetupTable.vue';
-import { writeFile, getFileContent } from '@/lib/fs-helper';
-import Secrets from '@/lib/secrets';
-import { XMLParser } from '@/lib/fxparser.min';
+import AppMainHeader from '@/components/AppMainHeader.vue';
+import { writeFile } from '@/lib/fs-helper'; // getFileContent,  verifyPermission, readFile
+// import { XMLParser } from '@/lib/fxparser.min';
 import { XMLBuilder } from '@/lib/fxbuilder.min';
-import { idbKeyval } from '@/lib/idb-keyval-iife';
+import fileMaster from '@/lib/file-master';
+import secrets from '@/lib/secrets-v1';
 
-const fxp = new XMLParser();
+// const fxp = new XMLParser();
 const fxb = new XMLBuilder();
 
 export default {
@@ -41,22 +52,16 @@ export default {
   components: {
     SelectDeviceFileButton,
     AddDataPrompt,
-    EncyptDataPrompt,
     SetupTable,
     RecentFilesWithSelectBox,
-  },
-  setup() {
-    const addDataPrompt = shallowRef();
-    return {
-      addDataPrompt,
-    };
+    AppMainHeader,
   },
   data() {
     return {
       fileHandle: null,
-      content: null,
-      sec: new Secrets(),
-      secData: [],
+      fileId: '',
+      contents: null,
+      plainObject: null,
       arrangeSecDataColumn: [
         // id: Int, serviceId: String, userId: String, password: String
         { title: 'ID', field: 'id' },
@@ -66,59 +71,77 @@ export default {
       ],
     };
   },
-  methods: {
-    // Event by SelectDeviceFileButton
-    async onGetNewFileHandle(fh) {
-      if (!fh) return;
-      this.fileHandle = await fh;
-      this.$refs.recentFiles.saveRecentFiles(fh);
+  computed: {
+    getUserFileHandle() {
+      return this.$store.getters['user/file'];
     },
+    // secData から SetupTable 用のオブジェクトを生成する
+    convFromSecDataToArrangeSecData() {
+      if (this.plainObject === null
+        || this.plainObject.length === 0) return [];
+      const res = this.plainObject.services
+        .map((service, idxA) => {
+          // id は {service idx + 1}(1000の位から上) + {account idx}(下3桁) の数値
+          const idA = (idxA + 1) * 1000;
+          /**
+           * @return {Array<Object>}
+           * Object => {id: Int, serviceId: String, userId: String, password: String ...}
+           */
+          return service.accounts.map((acc, idxB) => Object.assign(
+            acc,
+            {
+              id: idA + idxB,
+              serviceId: service.id,
+            },
+          ));
+        }); // => 2 Dimention Array
+      return res.flat(); // => 1 Dim
+    },
+  },
+  watch: {
+    async getUserFileHandle(next) {
+      this.fileHandle = next;
+      this.contents = await fileMaster.getContent(next);
+      this.fileId = this.contents.meta.devicefileid;
+      this.plainObject = null;
+      console.log('user file changed');
+      console.log('contents', this.contents);
+      console.log('fileId', this.fileId);
+    },
+  },
+  methods: {
     // データを表示する
     async showContentData() {
-      const xmlText = await getFileContent(this.fileHandle);
-      const xml = fxp.parse(xmlText); // parse to Object
-      try {
-        if (xml.meta.devicefileid) {
-          this.content = xml;
-          // Secrets 初期化および DeviceFileID 設定
-          this.sec = Secrets.importEncyptedData(xml.data);
-          this.sec.setDeviceFileId(xml.meta.devicefileid);
-          // 表示データなし
-          if (xml.data === '') {
-            console.log('表示するデータがありません');
-            return;
-          }
-          // 表示データあり
-          // 複合化
-          const inputPassword = window.prompt('Enter PASSPHRASE for Data Decrypt'); // eslint-disable-line
-          if (inputPassword) {
-            await this.sec.decryptCipher(inputPassword);
-            const masked = this.sec.getMaskedAsObject();
-            this.secData = masked;
-          }
-        } else {
-          console.log('Device File ID がありません');
-        }
-      } catch (error) {
-        console.log('不正なファイルです', error);
+      // 複合化
+      const inputPassword = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
+      if (inputPassword) {
+        this.plainObject = await secrets
+          .importEncyptedString(this.contents.data, this.fileId, inputPassword);
+        console.log('plainObject', this.plainObject);
       }
     },
     // データを追加する（AddDataPrompt）
     async addDataIntoFile(uId, password) {
-      console.log(uId, password);
-      if (!uId || !this.fileHandle) return;
-      const randomServiceId = ulid();
-      this.sec.pushAccount(randomServiceId, uId, password);
-      this.secData = this.sec.getMaskedAsObject();
+      if (!uId || !password || !this.fileHandle) return;
+      this.plainObject.services.push({
+        id: ulid(),
+        accounts: [{
+          uid: uId, password,
+        }],
+      });
+      console.log('data added', this.plainObject.services);
     },
     // データを書き込む（EncyptDataPrompt）
-    async zipDeviceFile(passphrase) {
-      if (!this.fileHandle || !this.content) return;
-      await this.sec.encryptMasked(passphrase);
-      const dataAsStr = this.sec.exportEncyptedDataAsString();
-      this.content.data = dataAsStr;
-      await writeFile(this.fileHandle, fxb.build(this.content));
-      console.log('書き込みました');
+    async lockFile() {
+      if (!this.fileHandle) return;
+      console.log('write contents', this.plainObject);
+      const pass = await this.$dialog.prompt({ message: 'Enter new PASSPHRASE for Data Encrypt' });
+      const plainString = await secrets
+        .exportAsEncryptedString(this.plainObject, this.fileId, pass);
+      this.contents.data = plainString;
+      await writeFile(this.fileHandle, fxb.build(this.contents));
+      console.log('write contents', this.plainObject, plainString, this.contents);
+      this.plainObject = null;
     },
     // File が選択されているかどうか確認する
     isFileSelected() {
@@ -129,34 +152,43 @@ export default {
       if (this.fileHandle === null) return '';
       return this.fileHandle.name;
     },
-    doTest() {
-      this.$refs.recentFiles.testMethod('ok?');
-    },
-  },
-  computed: {
-    // secData から SetupTable 用のオブジェクトを生成する
-    convFromSecDataToArrangeSecData() {
-      const res = this.secData.map((service, idxA) => {
-        // id は {service idx + 1}(1000の位から上) + {account idx}(下3桁) の数値
-        const idA = (idxA + 1) * 1000;
-        /**
-         * @return {Array<Object>}
-         * Object => {id: Int, serviceId: String, userId: String, password: String ...}
-         */
-        return service.accounts.map((acc, idxB) => Object.assign(
-          acc,
-          {
-            id: idA + idxB,
-            serviceId: service.id,
-          },
-        ));
-      }); // => 2 Dimention Array
-      return res.flat(); // => 1 Dim
-    },
   },
   async mounted() {
-    console.log(await idbKeyval.keys());
+    this.fileHandle = this.$store.getters['user/file'];
+    this.$store.watch(
+      (state, getters) => getters['user/file'],
+      (next) => {
+        this.fileHandle = next;
+      },
+    );
   },
 };
 
 </script>
+
+<style lang="scss" scoped>
+  .selected-file-name-view {
+    color: white;
+    background-color: black;
+    padding: 4px 6px;
+  }
+  button {
+    color: #fff;
+    background-color: #0629eb;
+    border: 0;
+    border-radius: 6px;
+    padding: 6px 12px;
+
+    &:hover {
+      transition: .8s;
+      color: #fff;
+      background: #3b54e0;
+      cursor: pointer;
+    }
+  }
+  .box {
+    border: 1px solid black;
+    padding: 6px 12px;
+    margin: 6px 12px;
+  }
+</style>

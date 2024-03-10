@@ -52,15 +52,15 @@ async function encrypt (message, password) {
 
   // 暗号化を実行
   const cipher = await window.crypto.subtle.encrypt(
-      {
-        name: 'AES-GCM',
-        iv: iv,
-        tagLength: 128, // GCMモードの改ざんチェック用データの長さ
-        // ↓ GCMモードのAAD（追加認証データ）、無くても良い
-        additionalData: new TextEncoder().encode('test')
-      },
-      key,
-      new TextEncoder().encode(message)
+    {
+      name: 'AES-GCM',
+      iv: iv,
+      tagLength: 128, // GCMモードの改ざんチェック用データの長さ
+      // ↓ GCMモードのAAD（追加認証データ）、無くても良い
+      additionalData: new TextEncoder().encode('test')
+    },
+    key,
+    new TextEncoder().encode(message)
   );
 
   // IV, salt, 暗号文を出力とする

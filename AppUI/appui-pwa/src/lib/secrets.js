@@ -2,78 +2,66 @@ import { encrypt, decrypt } from './cypto';
 import { XMLParser } from './fxparser.min';
 import { XMLBuilder } from './fxbuilder.min';
 import { base64ToArrayBuffer, arrayBufferToBase64 } from './string_to_buffer';
-import { idbKeyval } from './idb-keyval-iife';
+import idbKeyval from './idb-keyval-iife';
+import SecretsMasked from './secrets-masked';
 
 /**
- * XML Parser 用
- * 常に配列にするキー
+ * 以下において、次のように名称を定義する.
+ * + 暗号配列   - 暗号出力結果(ArrayBuffer) (EncryptedObject)
+ * + 暗号文字列 - 暗号配列を Base64 出力したもの (EncryptedString)
+ * + 平文配列   - 平文のオブジェクト (PlainObject)
+ * + 平文文字列 - XML にパースされた平文配列 (PlainString)
  */
-const ALWAYS_ARRAY_KEYS = [
-  'services',
-  'services.accounts',
-];
 
 /**
- * XML Parser 用
- * オプションオブジェクト
+ * XML Parser 設定
  */
-const XML_PARSER_OPTION = {
-  ignoreAttributes: false,
-  isArray: (name, jpath) => (ALWAYS_ARRAY_KEYS.indexOf(jpath) !== -1),
+const ALWAYS_ARRAY_KEYS = ['services', 'services.accounts'];
+const fastXML = {
+  // 常に配列にするキーリスト
+  // コンストラクト
+  parser: new XMLParser({
+    ignoreAttributes: false,
+    isArray: (name, jpath) => (ALWAYS_ARRAY_KEYS.indexOf(jpath) !== -1),
+  }),
+
+  builder: new XMLBuilder(),
 };
 
-/**
- * Device file の'データ'を取り扱うためのクラス
- */
 class Secrets {
-  constructor(inputCipher = null) {
-    this.cipher = inputCipher;
-    this.masked = null;
-    this.fileId = null;
+  masked = null;
+
+  static createNewSecrets() {
+    const secrets = new Secrets();
+    secrets.masked = new SecretsMasked();
+    return secrets;
   }
 
   /**
-   * ファイルコンテンツの'データ'を取得し、コンストラクトされた Secrets を返します
-   * @param {String} encryptedText 暗号化された文字列
-   * @return {Object<Secrets>} Secrets オブジェクト
+   * 暗号文字列をインポート
+   * @param {String} text 暗号文字列
+   * @param {String} fileId File ID
+   * @param {String} password パスワード
    */
-  static importEncyptedData(encryptedText) {
-    const cipher = (encryptedText)
-      ? base64ToArrayBuffer(encryptedText)
-      : new ArrayBuffer();
-    return new Secrets(cipher);
-  }
-
-  /**
-   * ファイルコンテンツの'データ'を取得し、コンストラクトされた Secrets を返します
-   * @return {Object<Secrets>} Secrets オブジェクト
-   */
-  exportEncyptedDataAsString() {
-    console.log('c:', this.cipher);
-    if (this.cipher === null) return '';
-    return arrayBufferToBase64(this.cipher);
-  }
-
-  /**
-   * Device File ID を設定します。暗号化において重要です。
-   * @param {String} deviceFileId
-   */
-  setDeviceFileId(deviceFileId) {
-    this.fileId = deviceFileId;
-  }
-
-  /**
-   * cipher を password で複合化します
-   * @param {String} password 複合化用パスワード
-   */
-  async decryptCipher(password) {
-    if (!this.cipher || !this.fileId) return;
-    const cryptokey = await idbKeyval.get(`CryptoKeys::${this.fileId}`)
+  async importEncyptedString(text, fileId, password) {
+    // text を cipher に変換
+    const cipher = base64ToArrayBuffer(text);
+    // 保存された CryptKeys 取得
+    const cryptokey = await idbKeyval.get(`CryptoKeys::${fileId}`)
       || null;
-    if (!cryptokey) return; // CryptoKey なし
-    const xmlStr = await decrypt(cryptokey, this.cipher, password);
-    this.masked = new XMLParser(XML_PARSER_OPTION).parse(xmlStr);
-    this.cipher = null;
+    if (!cryptokey) { console.log('暗号鍵がありません'); return; }
+    // 複合化
+    const plainString = await decrypt(cryptokey, cipher, password);
+    // 平文配列に変換 して、SecretsMasked をコンストラクトする
+    if (plainString) {
+      const plainObject = fastXML.parser.parse(plainString);
+      this.masked = new SecretsMasked(plainObject);
+    } else {
+      this.masked = new SecretsMasked();
+    }
+    console.log('text, fileId, password', text, fileId, password);
+    console.log('cryptokey', cryptokey);
+    console.log('plainString', plainString);
   }
 
   /**
@@ -81,73 +69,16 @@ class Secrets {
    * @param {String} password 暗号化用パスワード
    * @return {ArrayBuffer} 暗号文
    */
-  async encryptMasked(password) {
-    if (!this.masked || !this.fileId) return;
-    const xmlStr = new XMLBuilder().build(this.masked);
-    const crypto = await encrypt(xmlStr, password);
+  async exportAsEncryptedString(fileId, password) {
+    const plainString = fastXML.builder.build(this.masked.exportAsObject());
+    const crypto = await encrypt(plainString, password);
     await idbKeyval.set(
-      `CryptoKeys::${this.fileId}`,
+      `CryptoKeys::${fileId}`,
       { salt: crypto.salt, iv: crypto.iv },
     );
-    this.cipher = crypto.cipher;
-    this.masked = null;
-    console.log('option, c, m:', crypto, this.cipher, this.masked);
-  }
-
-  /**
-   * Service ID が存在するかどうか確認します
-   * @param {String} serviceId 検索対象の Service ID
-   * @return {Int} 存在しない場合は -1, 存在する場合は'services'の index
-   */
-  lookupService(serviceId) {
-    if (!this.masked) return -1;
-    return this.masked.services
-      .map((service) => service.id)
-      .indexOf(serviceId);
-  }
-
-  /**
-   * Service ID を指定して Account を登録します
-   * もし Service ID が新規の場合、新しい Service として登録されます。
-   * @param {Object} {} Service ID と Account オブジェクト
-   *  -> {serviceid: String, account: Object}
-   */
-  pushAccount(serviceId, userId, userPassword) {
-    // なにもデータが与えられていないとき
-    if (!this.masked && !this.cipher) return;
-
-    // masked だけ null のとき; 新規ファイルで'データ'がないとき
-    if (!this.masked) {
-      this.masked = { services: [] };
-    }
-
-    const newAccount = {
-      uid: userId,
-      password: userPassword,
-    };
-
-    const lookupIndex = this.lookupService(serviceId);
-    if (lookupIndex === -1) {
-      // 新規
-      this.masked.services.push({
-        id: serviceId,
-        accounts: [newAccount],
-      });
-    } else {
-      // 追記
-      this.masked.services[lookupIndex]
-        .accounts.push(newAccount);
-    }
-
-    console.log('Account update:', serviceId, newAccount);
-  }
-
-  /**
-   * masked データを取得します
-   * @return {Object}
-   */
-  getMaskedAsObject() {
-    return this.masked.services;
+    console.log('fileId, password', fileId, password);
+    console.log('crypto', crypto);
+    return arrayBufferToBase64(crypto.cipher);
   }
 }
 

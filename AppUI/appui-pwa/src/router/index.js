@@ -4,6 +4,7 @@ import LinkView from '@/views/LinkView.vue';
 import StartView from '@/views/StartView.vue';
 import ContentView from '@/views/ContentView.vue';
 import ServiceGenView from '@/views/ServiceGenView.vue';
+import ConfigView from '@/views/ConfigView.vue';
 
 const routes = [
   {
@@ -15,6 +16,11 @@ const routes = [
     path: '/start',
     name: 'StartPage',
     component: StartView,
+  },
+  {
+    path: '/config',
+    name: 'ConfigPage',
+    component: ConfigView,
   },
   {
     path: '/link/:id',
