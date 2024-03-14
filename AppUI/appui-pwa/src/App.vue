@@ -21,7 +21,7 @@ export default {
 
 <style lang="scss" scoped>
   .main-wrp {
-    margin-top: 48px;
-    margin-bottom: 72px;
+    margin-top: 48px; // HeaderHeight
+    margin-bottom: calc(72px + 100px); // FooterHeight + 予備
   }
 </style>

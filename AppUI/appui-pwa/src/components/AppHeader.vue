@@ -35,6 +35,7 @@ export default {
     top: 0;
     height: 48px;
     background-color: black;
+    z-index: 100;
     * {
       color: white;
     }

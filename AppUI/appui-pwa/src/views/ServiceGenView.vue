@@ -74,18 +74,25 @@ export default {
         return;
       }
 
+      console.log(requestBody);
+
       const confirmMessage = `次の内容を送信します. よろしいですか？\n${JSON.stringify(requestBody)}`;
       if (!this.$dialog.confirm({ message: confirmMessage })) return;
       const receptionId = await (async () => {
         try {
-          const response = await fetch('http://localhost:8000/agent/link/stock', {
+          const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
+          // const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
+          const body = new FormData();
+          const keys = Object.keys(requestBody);
+          keys.forEach((key) => {
+            body.append(key, requestBody[key]);
+          });
+          const response = await fetch(ENDPOINT, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
+            body,
           });
           const resdata = await response.json();
+          console.log('resdata', resdata);
           return resdata.reception_id;
         } catch (error) {
           console.error(error);

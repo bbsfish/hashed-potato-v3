@@ -48,7 +48,8 @@ export default {
   methods: {
     async fetchRequestedData() {
       try {
-        const response = await fetch(`http://localhost:8000/agent/link/fetch/${this.receptionId}`);
+        const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
+        const response = await fetch(`${ENDPOINT}?reception_id=${this.receptionId}`);
         const resData = await response.json();
         this.requestedData = resData;
       } catch (error) {

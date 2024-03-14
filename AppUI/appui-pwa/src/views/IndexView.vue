@@ -1,7 +1,7 @@
 <template>
   <main>
     <div className="keyvisual">
-      <div id="kv-message">Hello World</div>
+      <div id="kv-message">Hello World<br />新しいシングルサインオン</div>
       <div id="kv-start"><router-link to="/start" id="getstarted">Get Started</router-link></div>
     </div>
     <section id="about">
@@ -132,6 +132,7 @@ export default {
     margin-right: auto;
   }
   img {
+    width: 100%;
     max-width: 500px;
   }
 </style>
