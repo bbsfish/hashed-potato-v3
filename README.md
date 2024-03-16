@@ -1,2 +1,2 @@
 # hashed-potato v3
-Website: http://hashed-potato.mydns.jp:8080/
+Website: https://hashed-potato.mydns.jp/
