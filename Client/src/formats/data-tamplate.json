@@ -1,0 +1,28 @@
+[
+  {
+    "key": "services",
+    "type": "array",
+    "havings": ["id", "accounts"],
+    "children": [
+      {
+        "key": "id",
+        "type": "string"
+      },
+      {
+        "key": "accounts",
+        "type": "array",
+        "havings": ["uid", "password"],
+        "children": [
+          {
+            "key": "uid",
+            "type": "string"
+          },
+          {
+            "key": "password",
+            "type": "string"
+          }
+        ]
+      }
+    ]
+  }
+]

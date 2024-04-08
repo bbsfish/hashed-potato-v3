@@ -7,6 +7,7 @@ const logger = require('morgan');
 
 const agentRouter = require('./routes/agent/main');
 const devicefileRouter = require('./routes/devicefile/main');
+const partnersRouter = require('./routes/partners/main');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'ui')));
 
 app.use('/agent', agentRouter);
 app.use('/devicefile', devicefileRouter);
+app.use('/partners', partnersRouter);
 
 
 // catch 404 and forward to error handler
