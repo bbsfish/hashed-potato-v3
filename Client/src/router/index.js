@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import IndexView from '@/views/IndexView.vue';
-import LinkView from '@/views/LinkView.vue';
+import SignInView from '@/views/SignInView.vue';
+import SignUpView from '@/views/SignUpView.vue';
 import StartView from '@/views/StartView.vue';
-import ContentView from '@/views/ContentView.vue';
+// import ContentView from '@/views/ContentView.vue';
 import ServiceGenView from '@/views/ServiceGenView.vue';
 import ConfigView from '@/views/ConfigView.vue';
 import DevelopperView from '@/views/DevelopperView.vue';
+import ContentEditorView from '@/views/ContentEditorView.vue';
+import PubkeyView from '@/views/PubkeyView.vue';
 
 const routes = [
   {
@@ -29,42 +32,45 @@ const routes = [
     component: DevelopperView,
   },
   {
-    path: '/link/:id',
-    name: 'LinkPage',
-    component: LinkView,
+    path: '/signin/:id',
+    name: 'SignInPage',
     children: [
       {
         path: '',
-        component: LinkView,
+        component: SignInView,
       },
     ],
   },
   {
-    path: '/view',
+    path: '/signup/:id',
+    name: 'SignUpPage',
+    children: [
+      {
+        path: '',
+        component: SignUpView,
+      },
+    ],
+  },
+  {
+    path: '/content',
     name: 'ContentPage',
-    component: ContentView,
+    component: ContentEditorView,
   },
   {
-    path: '/sg/:id',
-    name: 'ServiceGenPage',
+    path: '/sg',
+    name: 'SGPage',
     component: ServiceGenView,
-    children: [
-      {
-        path: 'generate',
-        component: ServiceGenView,
-        props: { mode: 'generate' },
-      },
-      {
-        path: 'redirect',
-        component: ServiceGenView,
-        props: { mode: 'redirect' },
-      },
-      {
-        path: '',
-        component: ServiceGenView,
-        props: { mode: 'generate' },
-      },
-    ],
+    props: { mode: 'generate' },
+  },
+  {
+    path: '/sg/redirect',
+    name: 'SGRedirectPage',
+    component: ServiceGenView,
+    props: { mode: 'redirect' },
+  },
+  {
+    path: '/pubkey',
+    component: PubkeyView,
   },
 ];
 

@@ -1,21 +1,17 @@
 <template>
-  <div className="dev">
-    <AppMainHeader title="Dev"/>
-    <section>
-      <h2>Menu</h2>
-      <nav>
-        <ul>
-          <li><router-link to="/link">Link</router-link></li>
-          <li><router-link to="/pubkey">Pubkey</router-link></li>
-          <li><router-link to="/sg">SrvGen</router-link></li>
-        </ul>
-      </nav>
-    </section>
-    <SelectRecents />
-    <button @click="doCheckUp">Check Up</button>
-    <button @click="doDecrypt">複合化</button>
-    <button @click="doEncrypt">暗号化</button>
-    <XMLEditor :xmlstring="xmlString" :key="editorKey" />
+  <div className="content-editor">
+    <AppMainHeader title="Content Editor"/>
+    <p>
+      ファイル内容の参照および編集ができます.
+    </p>
+    <div>
+      <SelectRecents />
+      <button @click="doCheckUp">Check Up</button>
+      <button @click="doDecrypt">複合化</button>
+    </div>
+    <div>
+      <XMLEditor :xmlstring="xmlString" :key="editorKey" />
+    </div>
   </div>
 </template>
 
@@ -27,7 +23,7 @@ import webStorage from '@/lib/webstorage';
 import { keys as keysIDB, get as getIDB } from 'idb-keyval';
 
 export default {
-  name: 'DevelopperView',
+  name: 'ContentEditorView',
   components: {
     AppMainHeader, SelectRecents, XMLEditor,
   },
@@ -84,4 +80,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  button {
+    font-size: 1rem;
+    width: 200px;
+    padding: .2rem 1rem;
+    &:hover {
+      box-shadow: 0 3px 5px rgba(0, 0, 0, .3);
+    }
+  }
 </style>

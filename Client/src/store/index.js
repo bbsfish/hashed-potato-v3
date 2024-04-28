@@ -3,12 +3,11 @@ import { createStore } from 'vuex';
 // eslint-disable-next-line import/no-extraneous-dependencies
 // import createPersistedState from 'vuex-persistedstate';
 
-import user from './modules/user';
-import files from './modules/files';
+import datastore from './modules/datastore';
 
 export default createStore({
   modules: {
-    user, files,
+    datastore,
   },
   plugins: [
     // createPersistedState({

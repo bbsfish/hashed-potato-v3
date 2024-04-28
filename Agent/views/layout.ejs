@@ -1,0 +1,16 @@
+<% const _meta = {}, _params = params; %>
+<% _meta.title = meta.title; %>
+<% _meta.lang = meta.lang; %>
+<% _meta.body = meta.body; %>
+
+<!DOCTYPE html>
+<html lang="<%= _meta.lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= _meta.title %></title>
+</head>
+<body>
+  <%- include(_meta.body, _params); %>
+</body>
+</html>

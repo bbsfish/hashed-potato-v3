@@ -1,0 +1,30 @@
+// Color Codes
+$colorcodes: (
+  "black": (
+    "default": rgb(0, 0, 0),
+    "light": rgb(59, 59, 59),
+  ),
+
+  "white": (
+    "default": rgb(255, 255, 255),
+    "dark": rgb(187, 187, 187),
+  ),
+
+  "accent": (
+    "default": rgb(255, 72, 0),
+  ),
+
+  "blue": (
+    "default": rgb(3, 7, 201),
+    "hovered": rgba(3, 6, 201, 0.647),
+  )
+);
+
+@function cp($colorname, $kind: "default", $alpha: 0) {
+  $palet: map-get($map: $colorcodes, $key: $colorname);
+  $code: map-get($map: $palet, $key: $kind);
+  @if $alpha != 0 {
+    @return rgba($code, $alpha);
+  }
+  @return $code;
+}

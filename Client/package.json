@@ -10,16 +10,20 @@
   "dependencies": {
     "core-js": "^3.8.3",
     "eslint-import-resolver-alias": "^1.1.2",
+    "idb-keyval": "^6.2.1",
     "path": "^0.12.7",
     "register-service-worker": "^1.7.2",
     "tabulator-tables": "^5.5.4",
+    "the-new-css-reset": "^1.11.2",
     "ulid": "^2.3.0",
     "uuid": "^9.0.1",
+    "value-schema": "^4.0.0",
     "vue": "^3.2.13",
     "vue-logger-plugin": "^2.2.3",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.2",
-    "vuex-persistedstate": "^4.1.0"
+    "vuex-persistedstate": "^4.1.0",
+    "xml-formatter": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -35,6 +39,7 @@
     "eslint-plugin-vue": "^8.0.3",
     "eslint-plugin-vuejs-accessibility": "^1.1.0",
     "sass": "^1.32.7",
-    "sass-loader": "^12.0.0"
+    "sass-loader": "^12.0.0",
+    "vue-svg-loader": "^0.17.0-beta.2"
   }
 }

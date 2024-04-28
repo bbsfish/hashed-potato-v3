@@ -1,24 +1,27 @@
 <template>
-  <header>
-    <div className='header-wrp'>
-      <div className='logo'>
-        <ul>
-          <li>
-            <router-link to='/'>
-              HASHED POTATO
-            </router-link>
-          </li>
-        </ul>
-      </div>
-      <nav className='menu'>
-        <ul>
-          <li><router-link to='/start'>Start</router-link></li>
-          <li><router-link to='/view'>View</router-link></li>
-          <li><router-link to='/config'>Config</router-link></li>
-        </ul>
-      </nav>
+  <div className="header">
+    <div className='header-logo'>
+      <router-link to='/' className="header-logo__item">
+        HASHED POTATO
+      </router-link>
     </div>
-  </header>
+    <nav className='header-menu'>
+      <ul className="header-menu__outer">
+        <li>
+          <router-link to='/start'>Start</router-link>
+        </li>
+        <li>
+          <router-link to='/content'>View</router-link>
+        </li>
+        <li>
+          <router-link to='/config'>Config</router-link>
+        </li>
+        <li>
+          <router-link to='/dev'>Dev</router-link>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </template>
 
 <script>
@@ -28,49 +31,42 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  header {
-    position: fixed;
-    width: 100vw;
-    left: 0;
-    top: 0;
-    height: 48px;
-    background-color: black;
-    z-index: 100;
+  @use "@/assets/styles/mediaquery.scss" as m;
+  @use "@/assets/styles/color.scss" as c;
+  .header {
+    font-size: 1.2rem;
+    @include m.mq(pc) {
+      width: 80%;
+    }
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+
     * {
-      color: white;
+      color: c.cp("white");
     }
 
-    .header-wrp {
-      width: 90%;
-      display: flex;
-      justify-content: space-between;
-      margin: 0 auto;
-
-      ul {
-        margin: 12px 0;
-        padding: 0;
-        li {
-          list-style: none;
-          display: block;
-          text-align: center;
-          margin: 0 6px;
-
-          a {
-            text-decoration: none;
-          }
-
-          a:hover {
-            cursor: pointer;
-            color: rgb(170, 170, 170);
-            transition: .8s;
-          }
-        }
+    a {
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+        transition: var(--trs-duration);
+        cursor: pointer;
       }
-      .menu ul {
+    }
+
+    .header-logo {
+      width: 150px;
+      text-align: center;
+    }
+
+    .header-menu {
+      .header-menu__outer {
+        height: 100%;
         display: flex;
-      }
-      .logo {
-        width: 150px;
+        gap: 1rem;
+        margin: 0 1rem;
       }
     }
   }

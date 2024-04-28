@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <div className="start">
     <AppMainHeader title="Start"/>
     <section>
       <ol>
@@ -7,7 +7,7 @@
           まず初めに、ローカルファイルを作成します.<br>
           "ファイルを作成する" を押すと、任意の名前でファイルがあなたのデバイスに作成されます.
           ファイル名の初期値は "My-Account-Store.txt" です.<br>
-          <CreateDeviceFileButton label='ファイルを作成する' />
+          <CreateDatastore label='ファイルを作成する' />
         </li>
         <li>
           "Enter new PASSPHRASE for Data Encrypt" とプロンプトが表示されます.
@@ -21,27 +21,22 @@
         </li>
       </ol>
     </section>
-  </main>
+  </div>
 </template>
 
 <script>
-import CreateDeviceFileButton from '@/components/CreateDeviceFileButton.vue';
+import CreateDatastore from '@/components/CreateDatastore.vue';
 import AppMainHeader from '@/components/AppMainHeader.vue';
 
 export default {
   name: 'StartView',
   components: {
-    CreateDeviceFileButton, AppMainHeader,
+    CreateDatastore, AppMainHeader,
   },
   methods: {},
-  mounted() {
-  },
 };
 
 </script>
 
 <style lang="scss" scoped>
-  a:hover {
-    cursor: pointer;
-  }
 </style>
