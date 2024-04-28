@@ -1,0 +1,60 @@
+.space {
+  width: 100%;
+}
+
+.formfield {
+  display: block;
+}
+
+.form {
+  width: 80%;
+  max-width: 18rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
+}
+
+.form h1 {
+  text-align: center;
+}
+
+.form-border {
+  text-align: center;
+}
+
+.brand-item {
+  width: 100%;
+  border: 1px solid #777;
+  border-radius: .2rem;
+  list-style: none;
+  height: 3rem;
+  margin: .5rem 0;
+}
+
+.brand-item label {
+  margin: 0;
+}
+
+.brand-button {
+  display: flex;
+  align-items: center;
+  height: 3rem;
+  background-color: white;
+  border: 0;
+}
+.brand-button:hover {
+  cursor: pointer;
+  background-color: rgb(140, 140, 140);
+}
+.brand-icon {
+  height: 2rem;
+  width: 2rem;
+}
+.brand-label {
+  font-size: 1rem;
+}
