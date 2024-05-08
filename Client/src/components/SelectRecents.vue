@@ -34,6 +34,7 @@ export default {
   data() {
     return {
       histories: [],
+      userSelected: null,
     };
   },
   methods: {

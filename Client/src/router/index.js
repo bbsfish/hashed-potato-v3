@@ -32,21 +32,25 @@ const routes = [
     component: DevelopperView,
   },
   {
-    path: '/signin/:id',
-    name: 'SignInPage',
+    path: '/signin',
+    name: 'SignInPageWithoutID',
+    component: SignInView,
     children: [
       {
-        path: '',
+        path: '/signin/:id',
+        name: 'SignInPage',
         component: SignInView,
       },
     ],
   },
   {
-    path: '/signup/:id',
-    name: 'SignUpPage',
+    path: '/signup',
+    name: 'SignUpPageWithoutID',
+    component: SignUpView,
     children: [
       {
-        path: '',
+        path: '/signup/:id',
+        name: 'SignInPage',
         component: SignUpView,
       },
     ],

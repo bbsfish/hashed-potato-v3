@@ -3,17 +3,17 @@
     <AppMainHeader title="SignUp"/>
     <p>Reception ID: {{ id }}</p>
     <p>Check: {{ (check) ? 'OK' : 'ERROR' }}</p>
-    <LinkFieldShow :content='content' />
+    <LinkFieldShow :fields='req' :key="req" />
     よければ、ファイルを選択
     <SelectRecents />
-    <DecryptButton @ondecrypted='lookupAccount' />
+    <DecryptButton @onDecrypted='getService' />
     <pre>
-      {{ content }}
+      {{ req }}
     </pre>
     <pre>
       {{ newAccount }}
     </pre>
-    <button @click="doRedirect">この内容でアカウントを作成する</button>
+    <button @click="recordeNewData">この内容でアカウントを作成する</button>
   </div>
 </template>
 
@@ -25,6 +25,11 @@ import LinkFieldShow from '@/components/LinkFieldShow.vue';
 import DecryptButton from '@/components/DecryptButton.vue';
 import signupvs from '@/formats/signup.vschema.js';
 import genPassword from '@/lib/random.js';
+import poster from '@/lib/http-poster.js';
+
+// エージェント URL
+const ENDPOINT = 'https://script.google.com/macros/s/'
+  + 'AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
 
 export default {
   name: 'SignUpView',
@@ -39,9 +44,10 @@ export default {
       /** @type {string} 受付ID */
       id: null,
       /** @type {{redirect_uri: string, scope: string[], type: string,
-       * self_request_auth_value: string, self_request_auth: string, requester_id: string}}
+       * self_request_auth_value: string, self_request_auth: string,
+       * requester_id: string}}
        * Link Request オプション */
-      content: null,
+      req: null,
       /** @type {boolean} ID 検証結果 */
       check: false,
       /** @type {{id: string, password: string}} 新しいアカウント */
@@ -50,43 +56,33 @@ export default {
   },
   methods: {
     /**
-     * エージェントから Link Request を取得する
-     * @param {string} 受付ID
-     * @returns {Promise<{redirect_uri: string, scope: string[], type: string,
-       * self_request_auth_value: string, self_request_auth: string, requester_id: string}>|null}
+     * ファイルの複合化が終わったら呼ばれる.
+     * state.editor から xmlobject に XML コンテンツを移動
+     * Resuester ID から Service を取得する
      */
-    async setContent(id) {
-      try {
-        const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
-        const response = await fetch(`${ENDPOINT}?reception_id=${id}`);
-        const resData = await response.json();
-        return resData;
-      } catch (error) {
-        console.error(error);
-        return null;
+    getService() {
+      const id = this.req.ID; // Resuester ID
+      const { xobject } = this.$store.getters['datastore/editorState'];
+      this.$store.commit('xmlobject/putXmlObject', xobject);
+      const service = this.$store.getters['xmlobject/getServiceById'](id);
+      if (!service) {
+        // 新規サービス
+        this.onNewService();
+      } else if (this.$dialog.confirm({
+        message: 'アカウントをすでに持っているようです. サインインするために、元のウェブサービスに戻りますか?',
+      })) {
+        poster.signup.cancel(this.req.RedirectURI);
+      } else {
+        this.$log.debug('キャンセル');
       }
     },
     /**
-     * データストアから該当のサービスを探し、
-     * あればサインイン、なければアカウント作成の処理に進む
+     * getService でアカウント情報がないとき、新規サービスを登録する
      */
-    lookupAccount(xobject) {
-      const cont = this.content;
-      if (!('services' in xobject)) {
-        console.debug('無効なファイルです');
-        return;
-      }
-      const index = xobject.services.service
-        .map((srv) => srv.id).indexOf(cont.requester_id);
-      if (index === -1) {
-        // アカウント作成
-        this.createAccount();
-      } else if (this.$dialog.confirm({ message: 'アカウントがあります。サインインしますか？' })) {
-        // アカウント存在
-        const account = xobject.services.service[index];
-        console.debug('サインインします', account);
-      }
-      console.debug('キャンセルされました');
+    onNewService() {
+      const id = this.req.ID; // Resuester ID
+      this.$store.dispatch('xmlobject/addService', { id });
+      this.createAccount();
     },
     /**
      * アカウント情報を作成し、newAccount に保存する
@@ -97,44 +93,83 @@ export default {
         password: genPassword(),
       };
     },
-    async doRedirect() {
-      const cont = this.content;
-      const { xobject } = this.$store.getters['datastore/editorState'];
-      console.log('xobject', xobject);
-      xobject.services.service.push({
-        id: cont.requester_id,
-        scope: cont.scope,
+    /**
+     * サインアップ情報を datastore/editorState におく
+     */
+    async recordeNewData() {
+      const createdAccount = this.newAccount;
+      if (!createdAccount) return;
+      this.$store.dispatch('xmlobject/addCredential', {
+        id: this.req.ID, credential: createdAccount,
       });
-      this.$store.commit('datastore/putEditor', { xobject });
+      const xmlObject = this.$store.getters['xmlobject/xmlObject'];
+      this.$store.commit('datastore/putEditor', {
+        xobject: xmlObject,
+      });
       this.$store.commit('datastore/modified');
-      const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Encrypt' });
+      const password = await this.$dialog
+        .prompt({ message: 'Enter PASSPHRASE for Data Encrypt' });
       await this.$store.dispatch('datastore/encryptContent', { password });
-      if (this.$dialog.confirm({ message: 'サインインしますか？' })) {
-        window.location.href = cont.redirect_uri;
-        return;
+      if (await this.$dialog.confirm({ message: 'リダイレクトします' })) {
+        this.doRedirect();
+      } else {
+        this.$log.info('キャンセルされました');
       }
-      console.debug('キャンセルされました');
+    },
+    async doRedirect() {
+      const createdAccount = this.newAccount;
+      poster.signup.send(this.req.RedirectURI, createdAccount);
     },
   },
   watch: {
-    async content(next) {
+    async req(next) {
+      this.$log.debug('Requestオプション(req) アップデート', next);
       try {
         if ('error' in next) throw next.error;
         await vs.applySchemaObject(signupvs, next);
         this.check = true;
       } catch (err) {
-        console.log(err);
+        this.$log.info(err);
         this.check = false;
       }
     },
-    async newAccount(next) {
-      console.log('newAccount next', next);
-      return next;
-    },
   },
   async mounted() {
+    const logger = this.$log;
+    logger.info('Endpoint', ENDPOINT);
+    // 受付 ID 入力
     this.id = this.$route.params.id;
-    this.content = await this.setContent(this.id);
+    /**
+     * エージェントから Link Request を取得する
+     * @param {string} 受付ID
+     * @returns {{
+      * RedirectURI: string, Scope: string[], Type: string,
+      * ID: string
+     * }|null}
+     */
+    this.req = await (async (id) => {
+      try {
+        const response = await fetch(`${ENDPOINT}?reception_id=${id}`);
+        /**
+         * @type {{
+          * redirect_uri: string, scope: string[], type: string,
+          * self_request_auth_value: string, self_request_auth: string,
+          * requester_id: string
+         * }}
+         */
+        const data = await response.json();
+        logger.debug('リクエストデータ', data);
+        return {
+          RedirectURI: data.redirect_uri,
+          Scope: data.scope,
+          Type: data.type,
+          ID: data.requester_id,
+        };
+      } catch (error) {
+        logger.info(error);
+        return null;
+      }
+    })(this.id);
   },
 };
 

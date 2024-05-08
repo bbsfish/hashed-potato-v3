@@ -34,6 +34,7 @@ export default {
   },
   data() {
     return {
+      xdataPutFlag: false, // xdata の watcher 用
       xdata: '',
       lineLenght: 0,
     };
@@ -41,11 +42,17 @@ export default {
   methods: {
     doFormat() {
       if (this.xdata === '') return;
+      this.xdataPutFlag = false; // xdata の watcher 対策
       this.xdata = xmlFormat(this.xdata);
     },
     async doSave() {
       const { handle } = this.$store.getters['datastore/fileState'];
       if (!handle) return;
+      if (!this.$store.getters['datastore/isFileModified']) {
+        // 未編集のとき
+        this.$log.debug('未編集です');
+        return;
+      }
       await this.$store.commit('datastore/putEditor', { xtext: this.xdata });
       const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Encrypt' });
       try {
@@ -58,7 +65,13 @@ export default {
   },
   watch: {
     xdata(next) {
-      this.$store.commit('datastore/modified');
+      if (!this.xdataPutFlag) {
+        // 1回目の変更イベントは、contents を表示したときのものなのでmodifiedは変更しない
+        // また、フォーマットボタンを押したときの変更イベントもmodifiedは変更しない
+        this.xdataPutFlag = true;
+      } else {
+        this.$store.commit('datastore/modified');
+      }
       this.$log.debug('xdata', next);
       this.lineLenght = (next.match(/\n/g) || []).length + 1;
     },

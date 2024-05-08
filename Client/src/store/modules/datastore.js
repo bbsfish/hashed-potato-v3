@@ -14,7 +14,7 @@ import { encrypt, decrypt } from '@/lib/cypto';
 /**
  * XML Parser 設定
  */
-const ALWAYS_ARRAY_KEYS = ['services.service'];
+const ALWAYS_ARRAY_KEYS = ['root.services.service', 'root.services.service.account', 'root.services.service.scope'];
 const fastXML = {
   // 常に配列にするキーリスト
   // コンストラクト
@@ -81,15 +81,14 @@ export default {
       Object.assign(state.file, res);
       return state.file;
     },
-    putEditor: (state, {
-      xtext = undefined,
-      xobject = undefined,
-    }) => {
-      const res = { xtext, xobject };
-      if (xtext) res.xobject = fastXML.parser.parse(xtext);
-      else if (xobject) res.xtext = fastXML.builder.build(xobject);
-      Object.assign(state.editor, res);
-      return state.editor;
+    putEditor: (state, xmlObject) => {
+      let {
+        xtext, xobject,
+      } = xmlObject;
+      if (!xtext && !xobject) return;
+      if (!xtext) xtext = fastXML.builder.build(xobject);
+      if (!xobject) xobject = fastXML.parser.parse(xtext);
+      Object.assign(state.editor, { xtext, xobject });
     },
     modified: (state) => {
       if (!state.file.isModified) state.file.isModified = true;
@@ -101,14 +100,17 @@ export default {
     fileContentAsXML: (state) => {
       const clone = devTemplate;
       Object.assign(clone, { meta: state.file.meta, data: state.file.data });
-      console.log('fileContentAsXML', clone);
       return fastXML.builder.build(clone);
     },
     fileState: (state) => state.file,
     editorState: (state) => {
       const { xtext, xobject } = state.editor;
+      if (!xtext) return { xtext: '', xobject: {} };
       return {
-        xtext: xtext.replace(/[\n\s　]+/g, ''), // eslint-disable-line no-irregular-whitespace
+        xtext: xtext
+          .replace(/\n+/g, '')
+          .replace(/　+/g, '') // eslint-disable-line no-irregular-whitespace
+          .replace(/\s{2,}/g, ''),
         xobject,
       };
     },
@@ -376,25 +378,5 @@ export default {
       }
       throw new Error('File cannot be output');
     },
-    // async putPrivateData({ getters, commit }, nextPrivateData) {
-    //   const file = getters.fileState;
-    //   if (!file.handle || !file.content) throw new Error('No file selected');
-    //   if (file.content.data !== '' && typeof file.content.data === 'string') {
-    //     throw new Error('Private data is locked');
-    //   }
-    //   file.content.data = nextPrivateData;
-    //   commit('_putFileContent', file.content);
-    //   commit('setModified', true);
-    //   return { handle: file.handle, id: file.id, data: nextPrivateData };
-    // },
-    // async commitFile({ getters, commit }) {
-    //   const file = getters.fileState;
-    //   if (!file.handle) throw new Error('No file selected');
-    //   if (!file.isModified) throw new Error('No change');
-    //   await writeFile(file.handle, fastXML.builder.build(file.content));
-    //   commit('setModified', false);
-    //   commit('_putFileContent', null);
-    //   return { handle: file.handle, id: file.id };
-    // },
   },
 };

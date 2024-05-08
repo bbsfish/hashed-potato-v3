@@ -15,15 +15,17 @@ export default {
   methods: {
     async doDecrypt() {
       const { handle } = this.$store.getters['datastore/fileState'];
-      console.log('handle', handle);
-      if (!handle) return;
+      if (!handle) {
+        this.$log.debug('Handle is null');
+        return;
+      }
       const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
       try {
-        const { xtext, xobject } = await this.$store.dispatch('datastore/decryptContent', { password });
-        this.$log.debug('decResult', { xtext, xobject });
-        this.$emit('ondecrypted', xobject);
+        const xmlThings = await this.$store.dispatch('datastore/decryptContent', { password });
+        this.$log.debug('Result of decryption', xmlThings);
+        this.$emit('onDecrypted');
       } catch (error) {
-        this.$log.info('decResult', error);
+        this.$log.info('Error on decryption', error);
       }
     },
   },

@@ -4,10 +4,11 @@ import { createStore } from 'vuex';
 // import createPersistedState from 'vuex-persistedstate';
 
 import datastore from './modules/datastore';
+import xmlobject from './modules/xmlobject';
 
 export default createStore({
   modules: {
-    datastore,
+    datastore, xmlobject,
   },
   plugins: [
     // createPersistedState({

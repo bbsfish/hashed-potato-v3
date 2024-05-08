@@ -1,17 +1,18 @@
 .hsp {
-  --primary-color: #ea0000;		/*このテンプレートのテーマカラー*/
-  --primary-text-color: #fff;		/*このテンプレートのテーマカラーの上に文字を載せる場合*/
-  --secondary-color: #003dea;		/*このテンプレートのアクセントカラー*/
-  --secondary-text-color: #fff;	/*このテンプレートのアクセントカラーの上に文字を載せる場合*/
+  --blue: #003dea;
+  --white: #fff;
+  --black: #777;
+  --shadow-black: rgba(0, 0, 0, .5);
 }
 
 /* ダイアログ */
 .hsp.dialog {
   width: 30vw;
-  background-color: white;
-  border: 1px solid #777;
+  min-width: 380px;
+  background-color: var(--white);
+  border: 1px solid var(--black);
   border-radius: .2rem;
-  box-shadow: 0 10px 25px 0 rgba(0, 0, 0, .5);
+  box-shadow: 0 10px 25px 0 var(--shadow-black);
   z-index: 200;
 
   position: fixed;
@@ -53,22 +54,24 @@
 
 .hsp.dialog__btn__sub {
   background-color: white;
-  color: var(--secondary-color);
+  color: var(--blue);
   border: 0;
 }
 .hsp.dialog__btn__sub:hover {
-  text-shadow: 1px 2px 3px #808080;
+  text-shadow: 1px 2px 3px var(--shadow-black);
+  text-decoration: underline;
   cursor: pointer;
 }
 
 .hsp.dialog__btn__main {
-  background-color: var(--secondary-color);
-  color: var(--secondary-text-color);
+  background-color: var(--blue);
+  color: var(--white);
   border: 0;
   border-radius: .2rem;
   padding: 0 2rem;
 }
 .hsp.dialog__btn__main:hover {
-  box-shadow: 0 10px 25px 0 rgba(0, 0, 0, .5);
+  box-shadow: 0 10px 25px 0 var(--shadow-black);
+  text-decoration: underline;
   cursor: pointer;
 }

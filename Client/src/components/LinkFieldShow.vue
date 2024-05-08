@@ -1,8 +1,9 @@
 <template>
   <div class="linkfieldshow">
-    <p>Type: {{ getType() }}</p>
-    <p>Scope: {{ getScope() }}</p>
-    <p>Requester ID: {{ getRequesterId() }}</p>
+    <p>Type: {{ type??'' }}</p>
+    <p>Scope: {{ scope??'' }}</p>
+    <p>Requester ID: {{ id??'' }}</p>
+    <p>Redirect URI: {{ redirectURI??'' }}</p>
   </div>
 </template>
 
@@ -11,39 +12,23 @@ export default {
   name: 'LinkFieldShow',
   components: {},
   props: {
-    content: {
-      redirect_uri: String,
-      scope: Array,
-      type: String,
-      self_request_auth_value: String,
-      self_request_auth: String,
-      requester_id: String,
+    // visibleCheck: Object,
+    fields: {
+      Type: String,
+      Scope: Array,
+      RedirectURI: String,
+      ID: String, // Requester ID
     },
   },
   data() {
     return {
+      type: this.fields?.Type,
+      scope: this.fields?.Scope,
+      redirectURI: this.fields?.RedirectURI,
+      id: this.fields?.ID,
     };
   },
-  methods: {
-    getContent() {
-      if (this.content === null) return {};
-      return this.content;
-    },
-    getType() {
-      if ('type' in this.getContent()) return this.content.type;
-      return '';
-    },
-    getScope() {
-      if ('scope' in this.getContent()) {
-        if (typeof this.content.scope === 'object') return this.content.scope.join(', ');
-        return 'none';
-      }
-      return '';
-    },
-    getRequesterId() {
-      if ('requester_id' in this.getContent()) return this.content.requester_id;
-      return '';
-    },
+  watch: {
   },
 };
 </script>

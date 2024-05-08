@@ -1,19 +1,19 @@
 import vschema from 'value-schema'; // eslint-disable-line import/no-extraneous-dependencies
 
 export default {
-  Type: vschema.string({
+  type: vschema.string({
     only: ['signup'],
   }),
-  RedirectURI: vschema.string({
+  redirect_uri: vschema.string({
     pattern: vschema.STRING.PATTERN.URI,
     trims: true,
     maxLength: 255,
   }),
-  ID: vschema.string({
+  requester_id: vschema.string({
     trims: true,
     maxLength: 31,
   }),
-  Scope: vschema.array({
+  scope: vschema.array({
     separatedBy: ',',
     toArray: true,
     each: {
