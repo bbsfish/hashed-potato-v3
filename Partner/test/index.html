@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./loaderview.css">
+</head>
+<body>
+	<!-- ローディング画面 hashed potato 用 -->
+  <script src="./loaderview.js" inline></script>
+  <div id="loaderview" class="loaderview">
+    <p class="loaderview txt" id="loaderview_message"></p>
+  </div>
+  <script>
+    document.addEventListener('load', loaderview.init('#loaderview'));
+  </script>
+
+  <div>
+    <button id="showIt">show</button>
+    <!-- <button id="hideDialog">dialog hide</button> -->
+    <script>
+      document.addEventListener('DOMContentLoaded', (e) => {
+        document.querySelector('#showIt').addEventListener('click', (e) => {
+          loaderview.show('読み込み中');
+          setTimeout(() => {
+            loaderview.hide();
+          }, 10000);
+        });
+        // document.querySelector('#hideDialog').addEventListener('click', dialog.hide);
+      });
+    </script>
+  </div>
+</body>
+</html>
