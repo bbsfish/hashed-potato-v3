@@ -25,7 +25,7 @@ import LinkFieldShow from '@/components/LinkFieldShow.vue';
 import DecryptButton from '@/components/DecryptButton.vue';
 import signupvs from '@/formats/signup.vschema.js';
 import genPassword from '@/lib/random.js';
-import poster from '@/lib/http-poster.js';
+import HttpPoster from '@/lib/http-poster.js';
 
 // エージェント URL
 const ENDPOINT = 'https://script.google.com/macros/s/'
@@ -60,7 +60,7 @@ export default {
      * state.editor から xmlobject に XML コンテンツを移動
      * Resuester ID から Service を取得する
      */
-    getService() {
+    async getService() {
       const id = this.req.ID; // Resuester ID
       const { xobject } = this.$store.getters['datastore/editorState'];
       this.$store.commit('xmlobject/putXmlObject', xobject);
@@ -71,7 +71,9 @@ export default {
       } else if (this.$dialog.confirm({
         message: 'アカウントをすでに持っているようです. サインインするために、元のウェブサービスに戻りますか?',
       })) {
-        poster.signup.cancel(this.req.RedirectURI);
+        const poster = new HttpPoster(this.req.RedirectURI);
+        await poster.postWithJSON(HttpPoster.RESULT.CANCELED);
+        // window.location.href = this.req.RedirectURI;
       } else {
         this.$log.debug('キャンセル');
       }
@@ -118,7 +120,9 @@ export default {
     },
     async doRedirect() {
       const createdAccount = this.newAccount;
-      poster.signup.send(this.req.RedirectURI, createdAccount);
+      const poster = new HttpPoster(this.req.RedirectURI);
+      await poster.postWithJSON(HttpPoster.RESULT.AGREED, createdAccount);
+      window.location.href = this.req.RedirectURI;
     },
   },
   watch: {

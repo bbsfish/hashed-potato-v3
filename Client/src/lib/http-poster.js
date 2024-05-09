@@ -1,3 +1,58 @@
+/**
+ * クライアントからパートナーに POST 送信する
+ */
+class HttpPoster {
+  /**
+   * POST 送信先を指定
+   * @param {string} endpoint POST 送信先
+   */
+  constructor(endpoint) {
+    this.endpoint = endpoint;
+  }
+
+  /**
+   * POST 情報のテンプレート
+   */
+  static RESULT = {
+    CANCELED: {
+      ok: false,
+      result: 'CANCELED',
+      resultcode: -1,
+    },
+    AGREED: {
+      ok: true,
+      result: 'AGREED',
+      resultcode: 1,
+    },
+  };
+
+  /**
+   * JSON でデータ送信
+   * @param {object} result 結果オブジェクト HttpPoster.RESULT より指定
+   * @param {object|null} [payload=null] その他追加情報
+   * @returns {boolean} fetch の成否
+   */
+  async postWithJSON(result, payload = null) {
+    try {
+      const body = result;
+      if (payload) Object.assign(body, payload);
+      if (!body) throw new Error('指定された resultName がありません');
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+}
+/*
 function createInput(key, value) {
   const input = document.createElement('input');
   input.type = 'hidden';
@@ -52,9 +107,5 @@ const signup = (() => {
     cancel, send,
   };
 })();
-
-const signin = (() => {})();
-
-const poster = { signup, signin };
-
-export default poster;
+*/
+export default HttpPoster;
