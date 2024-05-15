@@ -1,4 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router';
+// History Mode: https://router.vuejs.org/guide/essentials/history-mode
+// WebHistory Mode
+// import { createRouter, createWebHistory } from 'vue-router';
+
+// WebHashHistory Mode
+import { createRouter, createWebHashHistory } from 'vue-router';
 import IndexView from '@/views/IndexView.vue';
 import SignInView from '@/views/SignInView.vue';
 import SignUpView from '@/views/SignUpView.vue';
@@ -50,7 +55,7 @@ const routes = [
     children: [
       {
         path: '/signup/:id',
-        name: 'SignInPage',
+        name: 'SignUpPage',
         component: SignUpView,
       },
     ],
@@ -79,7 +84,8 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(),
+  // history: createWebHistory(process.env.BASE_URL),
   routes,
 });
 

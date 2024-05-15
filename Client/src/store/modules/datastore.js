@@ -26,6 +26,12 @@ const fastXML = {
   builder: new XMLBuilder(),
 };
 
+/**
+ * FileHandle からテキストを取得し、オブジェクトに変換する.
+ * 変換時には XML Parser 設定を使う.
+ * @param {object<FileSystemFileHandle>} fileHandle
+ * @returns {object|error}
+ */
 const fileParser = async (fileHandle) => {
   if (verifyPermission(fileHandle)) {
     const file = await fileHandle.getFile();
@@ -33,13 +39,10 @@ const fileParser = async (fileHandle) => {
     const object = fastXML.parser.parse(fileText);
     return object;
   }
-  return new Error('file access is banned');
+  return new Error('File access is denied');
 };
 
 const initState = () => ({
-  /**
-   * 操作対象
-   */
   file: {
     handle: null,
     id: null,
@@ -97,6 +100,7 @@ export default {
   getters: {
     isExistFileId: (state) => (fileId) => state.fileIds.includes(fileId),
     isFileModified: (state) => state.file.isModified,
+    isEmptyData: (state) => (!state.file.data || state.file.data === ''),
     fileContentAsXML: (state) => {
       const clone = devTemplate;
       Object.assign(clone, { meta: state.file.meta, data: state.file.data });
@@ -312,7 +316,7 @@ export default {
      * 複合化したデータは state.editor に保存されます.
      * @param {object<VuexContext>}
      * @param {string} password
-     * @returns {object|error} 複合化&パースされたプライベートデータ
+     * @returns {{ xtext: object, xobject: object }|null|error} 複合化&パースされたプライベートデータ
      */
     async decryptContent({ getters, dispatch, commit }, { password }) {
       const {
@@ -321,7 +325,7 @@ export default {
       if (!handle) throw new Error('No file selected');
       if (!data || data === '') {
         commit('putEditor', { xtext: '' });
-        return {};
+        return null;
       }
       const { index, iv, salt } = (await dispatch('fetch')).getKeySet(id);
       const ivAB = base64ToArrayBuffer(iv);

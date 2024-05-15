@@ -7,6 +7,27 @@ export default {
   namespaced: true,
   state: initState(),
   mutations: {
+    initXmlObject(state) {
+      if (!('root' in state.xo) || typeof state.xo.root === 'string') {
+        state.xo = { root: {} };
+      }
+      console.debug('typeof state.xo.root', typeof state.xo.root);
+
+      const r = state.xo.root;
+      console.debug('typeof r.services', typeof r.services);
+      if (!('services' in r) || typeof r.services === 'string') {
+        r.services = { service: {} };
+      }
+      console.debug('typeof r.services.service', typeof r.services.service);
+      if (!('service' in r.services) || typeof r.services.service === 'string') {
+        r.services.service = [];
+      }
+      console.debug('typeof r.youare', typeof r.youare);
+      if (!('youare' in r) || typeof r.youare === 'string') {
+        r.youare = {};
+      }
+      state.xo.root = r;
+    },
     putXmlObject(state, object) {
       state.xo = object;
     },

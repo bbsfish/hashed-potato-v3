@@ -35,11 +35,12 @@ class HttpPoster {
   async postWithJSON(result, payload = null) {
     try {
       const body = result;
+      console.log('body', body);
       if (payload) Object.assign(body, payload);
+      console.log('payload', payload);
       if (!body) throw new Error('指定された resultName がありません');
       const response = await fetch(this.endpoint, {
         method: 'POST',
-        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },

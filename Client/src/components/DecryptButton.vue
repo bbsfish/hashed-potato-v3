@@ -13,20 +13,25 @@ export default {
   },
   emits: ['ondecrypted'],
   methods: {
+    /**
+     * store の file を複合化する.
+     * file がなければエラーを返す.
+     * エラー以外で処理が完了したら、'ondecrypted' を emit する.
+     */
     async doDecrypt() {
       const { handle } = this.$store.getters['datastore/fileState'];
-      if (!handle) {
-        this.$log.debug('Handle is null');
+      // handle チェック
+      if (!handle) throw new Error('Handle is null');
+      // 複合化 不要
+      if (this.$store.getters['datastore/isEmptyData']) {
+        this.$log.debug('Data is none');
+        this.$emit('ondecrypted');
         return;
       }
+      // 複合化 要
       const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
-      try {
-        const xmlThings = await this.$store.dispatch('datastore/decryptContent', { password });
-        this.$log.debug('Result of decryption', xmlThings);
-        this.$emit('onDecrypted');
-      } catch (error) {
-        this.$log.info('Error on decryption', error);
-      }
+      await this.$store.dispatch('datastore/decryptContent', { password });
+      this.$emit('ondecrypted');
     },
   },
 };

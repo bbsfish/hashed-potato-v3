@@ -2,7 +2,7 @@ import vschema from 'value-schema'; // eslint-disable-line import/no-extraneous-
 
 export default {
   Type: vschema.string({
-    only: ['signup'],
+    only: ['signup', 'signin'],
   }),
   RedirectURI: vschema.string({
     pattern: vschema.STRING.PATTERN.URI,

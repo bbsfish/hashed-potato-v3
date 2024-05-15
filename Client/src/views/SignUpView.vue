@@ -6,13 +6,17 @@
     <LinkFieldShow :fields='req' :key="req" />
     よければ、ファイルを選択
     <SelectRecents />
-    <DecryptButton @onDecrypted='getService' />
+    <DecryptButton @ondecrypted='getService' />
+    <h3>リクエスト内容</h3>
     <pre>
       {{ req }}
     </pre>
+    <h3>作成するアカウント</h3>
     <pre>
       {{ newAccount }}
     </pre>
+    <h3>送信する情報</h3>
+      {{ postData }}
     <button @click="recordeNewData">この内容でアカウントを作成する</button>
   </div>
 </template>
@@ -50,8 +54,13 @@ export default {
       req: null,
       /** @type {boolean} ID 検証結果 */
       check: false,
-      /** @type {{id: string, password: string}} 新しいアカウント */
+      /** @type {{ id: string, password: string }|null} 作成した認証情報 */
       newAccount: null,
+      /** @type {object|null} 送信情報 */
+      postData: {
+        identity: null,
+        credential: null,
+      },
     };
   },
   methods: {
@@ -61,22 +70,33 @@ export default {
      * Resuester ID から Service を取得する
      */
     async getService() {
-      const id = this.req.ID; // Resuester ID
-      const { xobject } = this.$store.getters['datastore/editorState'];
-      this.$store.commit('xmlobject/putXmlObject', xobject);
-      const service = this.$store.getters['xmlobject/getServiceById'](id);
-      if (!service) {
-        // 新規サービス
-        this.onNewService();
-      } else if (this.$dialog.confirm({
-        message: 'アカウントをすでに持っているようです. サインインするために、元のウェブサービスに戻りますか?',
-      })) {
-        const poster = new HttpPoster(this.req.RedirectURI);
-        await poster.postWithJSON(HttpPoster.RESULT.CANCELED);
-        // window.location.href = this.req.RedirectURI;
+      const rqID = this.req.ID;
+
+      if (!this.$store.getters['datastore/isEmptyData']) {
+        // Data ありのとき: アカウントの所持を確認
+        const { xobject } = this.$store.getters['datastore/editorState'];
+        this.$store.commit('xmlobject/putXmlObject', xobject);
+        const service = this.$store.getters['xmlobject/getServiceById'](rqID);
+        if (service) {
+          // アカウントあり
+          const consent = this.$dialog.confirm({
+            message: 'アカウントをすでに持っているようです. サインインするために、元のウェブサービスに戻りますか?',
+          });
+          if (consent) {
+            const poster = new HttpPoster(this.req.RedirectURI);
+            poster.postWithJSON(HttpPoster.RESULT.CANCELED);
+            window.location.href = this.req.RedirectURI;
+            return;
+          }
+          this.$log.info('キャンセルされました');
+          return;
+        }
       } else {
-        this.$log.debug('キャンセル');
+        // Data なしのとき: xmlobject store を初期化
+        this.$store.commit('xmlobject/initXmlObject');
       }
+
+      this.onNewService();
     },
     /**
      * getService でアカウント情報がないとき、新規サービスを登録する
@@ -121,7 +141,10 @@ export default {
     async doRedirect() {
       const createdAccount = this.newAccount;
       const poster = new HttpPoster(this.req.RedirectURI);
-      await poster.postWithJSON(HttpPoster.RESULT.AGREED, createdAccount);
+      poster.postWithJSON(HttpPoster.RESULT.AGREED, {
+        credential: createdAccount,
+        info: this.personalInfo,
+      });
       window.location.href = this.req.RedirectURI;
     },
   },
@@ -130,7 +153,7 @@ export default {
       this.$log.debug('Requestオプション(req) アップデート', next);
       try {
         if ('error' in next) throw next.error;
-        await vs.applySchemaObject(signupvs, next);
+        vs.applySchemaObject(signupvs, next);
         this.check = true;
       } catch (err) {
         this.$log.info(err);
