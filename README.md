@@ -1,2 +1,2 @@
 # hashed-potato v3
-Website: https://hashed-potato.mydns.jp/
+WebApp: [https://hashed-potato.mydns.jp/](https://bbsfish.github.io/hashed-potato-dev/)
