@@ -9,7 +9,7 @@ const hsp = {
     requester_id: 'sample-online-mall',
 
     /** @type {string[]} Scope: 'nickname', 'email', 'phonenumber */
-    scope: ['none'],
+    scope: ['nickname'],
 
     /** @type {string[]} */
     self_request_auth: 'temp_token',

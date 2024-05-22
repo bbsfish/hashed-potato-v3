@@ -1,87 +1,76 @@
 <template>
-  <div className="dev">
+  <div class="dev">
     <AppMainHeader title="Dev"/>
+    <h3>Services</h3>
     <section>
-      <h2>Menu</h2>
-      <nav>
-        <ul>
-          <li><router-link to="/link">Link</router-link></li>
-          <li><router-link to="/pubkey">Pubkey</router-link></li>
-          <li><router-link to="/sg">SrvGen</router-link></li>
-        </ul>
-      </nav>
+      <ServiceTableShow
+        :key="table.key"
+        :services="this.xo.services.service"
+        @onedit="onTableEdit"
+      />
     </section>
-    <SelectRecents />
-    <button @click="doCheckUp">Check Up</button>
-    <button @click="doDecrypt">複合化</button>
-    <button @click="doEncrypt">暗号化</button>
-    <XMLEditor :xmlstring="xmlString" :key="editorKey" />
+    <EditServiceWindow
+      :key="edit.key"
+      :service="edit.targetService"
+      @onsave="onEditorSave"
+      @oncancel="onEditorCancel"
+    />
   </div>
 </template>
 
 <script>
 import AppMainHeader from '@/components/AppMainHeader.vue';
-import XMLEditor from '@/components/XMLEditor.vue';
-import SelectRecents from '@/components/SelectRecents.vue';
-import webStorage from '@/lib/webstorage';
-import { keys as keysIDB, get as getIDB } from 'idb-keyval';
+import EditServiceWindow from '@/components/EditServiceWindow.vue';
+import ServiceTableShow from '@/components/ServiceTableShow.vue';
 
 export default {
   name: 'DevelopperView',
   components: {
-    AppMainHeader, SelectRecents, XMLEditor,
+    AppMainHeader, EditServiceWindow, ServiceTableShow,
   },
   data() {
     return {
-      xmlString: '',
-      editorKey: 0,
+      table: {
+        key: 0,
+      },
+      edit: {
+        targetService: null,
+        targetIndex: -1,
+        key: 0,
+      },
+      xo: {
+        services: {
+          service: [
+            { id: 'abc', credential: { id: 'abcID', password: 'abcPASS' }, scope: ['aaa', 'bbb', 'ccc'] },
+            { id: '123', credential: { id: '123ID', password: '123PASS' } },
+            { id: 'abc', credential: { id: 'abcID', password: 'abcPASS' }, scope: ['aaa', 'bbb', 'ccc'] },
+          ],
+        },
+        youare: {
+          aaa: 'xxx',
+          bbb: 'yyy',
+        },
+      },
     };
   },
   methods: {
-    async doCheckUp() {
-      this.$log.info('WebStorage Keys:', webStorage.keys());
-      webStorage.keys().forEach((key) => {
-        this.$log.info('WebStorage [', key, ']', webStorage.get(key));
-      });
-      this.$log.info('FileState', this.$store.getters['datastore/fileState']);
-      this.$log.info('keysIDB', await keysIDB());
-      Promise.all(
-        (await keysIDB()).map(async (key) => {
-          this.$log.info('WebStorage [', key, ']', await getIDB(key));
-        }),
-      );
+    onTableEdit({ index, service }) {
+      this.edit.targetService = service;
+      this.edit.targetIndex = index;
+      this.edit.key += 1;
     },
-    async doDecrypt() {
-      const { handle } = this.$store.getters['datastore/fileState'];
-      if (!handle) return;
-      const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
-      try {
-        const { xtext, xobject } = await this.$store.dispatch('datastore/decryptContent', { password });
-        this.$log.debug('decResult', { xtext, xobject });
-        this.xmlString = xtext;
-      } catch (error) {
-        this.$log.info('decResult', error);
-      }
+    onEditorSave({ service }) {
+      const idx = this.edit.targetIndex;
+      Object.assign(this.xo.services.service[idx], service);
+      this.tableUpdate();
     },
-  },
-  watch: {
-    xmlString() {
-      this.editorKey += 1;
+    onEditorCancel({ service }) {
+      this.$log.debug('onCancel', service);
     },
-  },
-  async mounted() {
-    this.$store.watch(
-      (state, getters) => getters['datastore/fileState'],
-      ({ handle }) => {
-        if (handle) {
-          this.currentFileName = handle.name;
-        }
-      },
-    );
+    tableUpdate() {
+      this.table.key += 1;
+    },
   },
 };
 
 </script>
-
-<style lang="scss" scoped>
-</style>

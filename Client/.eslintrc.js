@@ -25,5 +25,6 @@ module.exports = {
     'import/no-unresolved': 0,
     'import/extensions': 0,
     'linebreak-style': 0,
+    'import/no-self-import': 0,
   },
 };
