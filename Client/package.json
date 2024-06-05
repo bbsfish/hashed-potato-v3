@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.8.3",
     "eslint-import-resolver-alias": "^1.1.2",
+    "fs": "^0.0.1-security",
     "idb-keyval": "^6.2.1",
     "path": "^0.12.7",
     "register-service-worker": "^1.7.2",

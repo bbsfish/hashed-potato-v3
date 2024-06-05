@@ -16,21 +16,38 @@ export default {
   methods: {
     async createFile() {
       try {
-        const createRes = await this.$store.dispatch('datastore/createFile');
-        this.$log.debug('result: datastore/createFile', createRes);
-        const isInit = await this.$dialog.confirm({ message: 'ファイルを初期化しますか?' });
-        if (isInit) {
-          const initRes = await this.$store.dispatch('datastore/initializeFile');
-          this.$log.debug('datastore/initializeFile', initRes);
-        }
+        const { handle, id } = await this.$store.dispatch('datastore/createFile');
+        this.$log.debug('Created file', '\nID:', id, '\nFileHandle:', handle);
+        this.initFile();
+        this.saveFileID(id);
+        this.addHandleIntoRecentFiles(handle);
       } catch (error) {
-        this.$log.info(error);
+        this.$log.error(error);
       }
     },
-  },
-  async mounted() {
-    const recentFiles = await (await this.$store.dispatch('datastore/fetch')).recentFiles();
-    console.log('recentFiles', recentFiles);
+    async initFile() {
+      try {
+        const isInit = await this.$dialog.confirm({ message: 'ファイルを初期化しますか?' });
+        if (isInit) {
+          const { handle, id } = await this.$store.dispatch('datastore/initializeFile');
+          this.$log.debug('Initialized file', '\nID:', id, '\nFileHandle:', handle);
+        }
+      } catch (error) {
+        this.$log.error(error);
+      }
+    },
+    async saveFileID(id) {
+      try {
+        await this.$store.dispatch('datastore/putFileKey', {
+          id, iv: null, salt: null,
+        });
+      } catch (error) {
+        this.$log.error(error);
+      }
+    },
+    async addHandleIntoRecentFiles(handle) {
+      await this.$store.dispatch('datastore/addRecent', { handle });
+    },
   },
 };
 </script>

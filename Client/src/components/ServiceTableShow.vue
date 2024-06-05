@@ -5,26 +5,18 @@
       <thead>
         <tr>
           <th scope="col">Service ID</th>
-          <th scope="col">Credential</th>
+          <th scope="col">Login ID</th>
+          <th scope="col">PassWord</th>
           <th scope="col">Scope</th>
         </tr>
       </thead>
       <tbody :key="tableKey">
         <tr v-for="(serv, servIndex) of srvs"
           :key="servIndex" @click="onEditData(servIndex)">
-          <td>{{ serv.id }}</td>
-          <td>
-            <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-            <label v-if="serv.credential.id"
-              :for="'id_' + servIndex">
-              ID: <span :id="'id_' + servIndex">{{ serv.credential.id }}</span>
-            </label>
-            <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -->
-            <label v-if="serv.credential.password" :for="'pass_' + servIndex">
-              Pass: <span :id="'pass_' + servIndex">{{ serv.credential.password }}</span>
-            </label>
-          </td>
-          <td v-if="serv.scope != undefined">{{ serv.scope.join(', ') }}</td>
+          <td>{{ serv?.id }}</td>
+          <td>{{ serv?.credential?.id }}</td>
+          <td>{{ serv?.credential?.password }}</td>
+          <td v-if="serv?.scope">{{ serv.scope.join(', ') }}</td>
           <td v-else>none</td>
         </tr>
       </tbody>
@@ -67,20 +59,38 @@ export default {
 @use "@/assets/styles/color.scss" as c;
 table {
   margin: 0 auto;
+  background-color: rgb(0, 0, 0);
+  th{
+    padding: 0 1rem;
+  }
+  td {
+    padding: 0 1rem;
+  }
   thead {
-    background-color: rgb(0, 0, 0);
     color: white;
   }
   tbody {
+    // tr, th, td {
+    //   background-color: white;
+    //   border: 1px solid c.cp("black");
+    // }
     tr {
       background-color: white;
-    }
-    tr {
       &:nth-child(odd) {
         background-color: gray;
+        &:hover {
+          background-color: rgb(57, 57, 57);
+          color: white;
+          cursor: pointer;
+        }
       }
       &:nth-child(even) {
+        background-color: white;
         border-bottom: 1px solid black;
+        &:hover {
+          background-color: rgb(198, 198, 198);
+          cursor: pointer;
+        }
       }
     }
   }

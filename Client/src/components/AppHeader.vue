@@ -1,12 +1,12 @@
 <template>
-  <div className="header">
-    <div className='header-logo'>
-      <router-link to='/' className="header-logo__item">
+  <div class="block-wrp header-wrp">
+    <div class='header-logo'>
+      <router-link to='/' class="header-logo__item">
         HASHED POTATO
       </router-link>
     </div>
-    <nav className='header-menu'>
-      <ul className="header-menu__outer">
+    <nav class='header-menu'>
+      <ul class="header-menu__outer">
         <li>
           <router-link to='/start'>Start</router-link>
         </li>
@@ -33,13 +33,9 @@ export default {
 <style lang="scss" scoped>
   @use "@/assets/styles/mediaquery.scss" as m;
   @use "@/assets/styles/color.scss" as c;
-  .header {
+  .header-wrp {
     font-size: 1.2rem;
-    @include m.mq(pc) {
-      width: 80%;
-    }
-    margin: 0 auto;
-
+    padding: .4rem 0;
     display: flex;
     justify-content: space-between;
 

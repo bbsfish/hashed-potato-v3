@@ -6,7 +6,7 @@
     <LinkFieldShow :fields='req' :key="req" />
     よければ、ファイルを選択
     <SelectRecents />
-    <DecryptButton @ondecrypted='getService' />
+    <DecryptFileButton @ondecrypted='getService' />
     <h3>リクエスト内容</h3>
     <pre>
       {{ req }}
@@ -27,7 +27,7 @@ import vs from 'value-schema';
 import AppMainHeader from '@/components/AppMainHeader.vue';
 import SelectRecents from '@/components/SelectRecents.vue';
 import LinkFieldShow from '@/components/LinkFieldShow.vue';
-import DecryptButton from '@/components/DecryptButton.vue';
+import DecryptFileButton from '@/components/DecryptFileButton.vue';
 import HttpPoster from '@/lib/http-poster.js';
 import signupvs from '@/formats/signup.vschema.js';
 
@@ -41,7 +41,7 @@ export default {
     AppMainHeader,
     SelectRecents,
     LinkFieldShow,
-    DecryptButton,
+    DecryptFileButton,
   },
   data() {
     return {

@@ -1,5 +1,5 @@
 <template>
-  <div class="footer">
+  <div class="block-wrp footer-wrp">
     <div className="copyright">&copy;hashed-potato.mydns.jp</div>
     <div className="note">システムは開発中です</div>
     <div v-if="isSupported() !== true" id='fsa-not-supported'>
@@ -29,10 +29,9 @@ export default {
 
 <style lang="scss" scoped>
   @use "@/assets/styles/mediaquery.scss" as m;
-  .footer {
+  .footer-wrp {
     background-color: black;
     color: white;
-    margin: 0 auto;
     @include m.mq(pc) {
       width: 80%;
     }

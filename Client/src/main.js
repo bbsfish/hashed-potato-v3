@@ -3,11 +3,11 @@
 import { createApp } from 'vue';
 
 // eslint-disable-next-line
+import logger from '@/logger/vue.plugin.js';
 import appDialog from '@/lib/app-dialog';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import logger from './logger';
 
 const app = createApp(App);
 

@@ -1,7 +1,14 @@
+/**
+ * ローカルストレージを使ったデータベース
+ * localStorage.setItem(<DatabaseName>, <JSON>)
+ * <JSON> は { Key1: <JSON>, Key2: <JSON>,... } の構造
+ * 上記の例の場合、webStorage.keys() では ['Key1', 'Key2', ...] が取得できる
+ */
+
 const DatabaseName = 'hashedpotato';
 
 const logger = (message, ...args) => console
-  .debug('[database] @', DatabaseName, '=>', message, args);
+  .debug('[WS] DB Name:', DatabaseName, '=>', message, args);
 
 const webStorage = ((dbname) => {
   let database;
@@ -43,7 +50,7 @@ const webStorage = ((dbname) => {
       console.info(`A database named "${dbname}" has been created.`);
     }
     database = getDatabase();
-    logger('Initial', database);
+    logger('Initial State:\n', database);
   })();
 
   return {

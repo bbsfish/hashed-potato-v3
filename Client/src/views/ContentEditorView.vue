@@ -1,77 +1,203 @@
 <template>
   <div className="content-editor">
-    <AppMainHeader title="Content Editor"/>
-    <p>
-      ファイル内容の参照および編集ができます.
-    </p>
-    <div>
-      <SelectRecents />
-      <button @click="doCheckUp">Check Up</button>
-      <button @click="doDecrypt">複合化</button>
+    <AppMainHeader title="Content Editor" description="ファイル内容の参照および編集ができます." />
+    <div class="file-selecter">
+      <SelectRecents label="最近のファイルから選択" />
+      <SelectFileButton label="デバイスから選択" />
     </div>
-    <div>
-      <XMLEditor :xmlstring="xmlString" :key="editorKey" />
+    <div class="file-selecter-support">
+      <DecryptFileButton v-if="!isBlankFile&&isFileSelected" />
+    </div>
+    <ServiceTableShow
+      :key="table.key"
+      :services="table.contents"
+      @onedit="onTableEdit"
+    />
+    <EditServiceWindow
+      :key="edit.key"
+      :service="edit.targetService"
+      @onsave="onEditorSave"
+      @oncancel="onEditorCancel"
+    />
+    <div class="table-support">
+      <button v-if="isFileSelected&&isBlankFile" @click="addDataIntoBlankFile">
+        データがありません. データを追加しましょう!
+      </button>
+      <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addData">
+        データを追加する
+      </button>
+    </div>
+    <div class="table-action">
+      <button v-if="isDataChanged&&writeModifiedFlag">
+        変更をもとに戻す
+      </button>
+      <button v-if="isDataChanged&&writeModifiedFlag" @click="doSave"
+        class="save-btn XMLEditor__saveBtn">
+        <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></span>
+        <span>保存</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 import AppMainHeader from '@/components/AppMainHeader.vue';
-import XMLEditor from '@/components/XMLEditor.vue';
+import EditServiceWindow from '@/components/EditServiceWindow.vue';
+import ServiceTableShow from '@/components/ServiceTableShow.vue';
 import SelectRecents from '@/components/SelectRecents.vue';
-import webStorage from '@/lib/webstorage';
-import { keys as keysIDB, get as getIDB } from 'idb-keyval';
+import SelectFileButton from '@/components/SelectFileButton.vue';
+import DecryptFileButton from '@/components/DecryptFileButton.vue';
 
 export default {
   name: 'ContentEditorView',
   components: {
-    AppMainHeader, SelectRecents, XMLEditor,
+    AppMainHeader,
+    SelectRecents,
+    EditServiceWindow,
+    ServiceTableShow,
+    SelectFileButton,
+    DecryptFileButton,
   },
   data() {
     return {
-      xmlString: '',
-      editorKey: 0,
+      /**
+       * Watcher によって更新されるものたち
+       */
+      // 1. ファイルが選択されているか
+      isFileSelected: false,
+      // 2. データが複合化されているか
+      isDataParsed: false,
+      // 3. データが空のファイルか
+      isBlankFile: false,
+      // 4. データが更新されているか
+      isDataChanged: false,
+      /**
+       * XML Object の root 以下
+       * @type {{
+       *  services: { service: object<ServiceElement>[] },
+       *  youare: object<PersonalInfosElement>[]
+       * }}
+       */
+      xoRoot: null,
+      writeModifiedFlag: false,
+      table: {
+        key: 0,
+        contents: null,
+      },
+      edit: {
+        targetService: null,
+        targetIndex: -1,
+        key: 0,
+      },
     };
   },
   methods: {
-    async doCheckUp() {
-      this.$log.info('WebStorage Keys:', webStorage.keys());
-      webStorage.keys().forEach((key) => {
-        this.$log.info('WebStorage [', key, ']', webStorage.get(key));
-      });
-      this.$log.info('FileState', this.$store.getters['datastore/fileState']);
-      this.$log.info('keysIDB', await keysIDB());
-      Promise.all(
-        (await keysIDB()).map(async (key) => {
-          this.$log.info('WebStorage [', key, ']', await getIDB(key));
-        }),
-      );
-    },
-    async doDecrypt() {
+    async addData() {
       const { handle } = this.$store.getters['datastore/fileState'];
       if (!handle) return;
-      const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
-      try {
-        const { xtext, xobject } = await this.$store.dispatch('datastore/decryptContent', { password });
-        this.$log.debug('decResult', { xtext, xobject });
-        this.xmlString = xtext;
-      } catch (error) {
-        this.$log.info('decResult', error);
+      if (!this.isBlankFile) {
+        this.table.contents = {};
+        this.xoRoot.services.service.push({});
+        this.onTableEdit({ index: this.xoRoot.services.service.length - 1, service: {} });
       }
+    },
+    async addDataIntoBlankFile() {
+      const { handle } = this.$store.getters['datastore/fileState'];
+      if (!handle) return;
+      if (this.isBlankFile) {
+        this.table.contents = {};
+        this.xoRoot = { services: { service: [{}] }, youare: [] };
+        this.onTableEdit({ index: 0, service: {} });
+      }
+    },
+    onTableEdit({ index, service }) {
+      this.edit.targetService = service;
+      this.edit.targetIndex = index;
+      this.edit.key += 1;
+    },
+    onEditorSave({ service }) {
+      const idx = this.edit.targetIndex;
+      const srv = service;
+      if (service.scope) {
+        srv.scope = srv.scope.filter((scp) => (scp !== ''));
+      }
+      Object.assign(this.xoRoot.services.service[idx], srv);
+      this.tableUpdate();
+      if (this.isBlankFile) this.isBlankFile = false;
+    },
+    onEditorCancel({ service }) {
+      this.$log.debug('onCancel', service);
+    },
+    tableUpdate() {
+      this.table.contents = this.xoRoot?.services?.service;
+      this.table.key += 1;
+    },
+    async doSave() {
+      const { handle } = this.$store.getters['datastore/fileState'];
+      if (!handle) return;
+      // 編集確認
+      if (!this.$store.getters['datastore/isModified']) {
+        this.$log.debug('未編集です');
+        return;
+      }
+      // state.editor にセットして、暗号化したのち、書き込み
+      await this.$store.commit('datastore/putEditor', { xobject: { root: this.xoRoot } });
+      const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Encrypt' });
+      try {
+        await this.$store.dispatch('datastore/encryptContent', { password });
+      } catch (error) {
+        this.$log.error('Error on datastore/encryptContent', error);
+      }
+      // 初期化
+      this.xoRoot = null;
+      this.writeModifiedFlag = false;
     },
   },
   watch: {
-    xmlString() {
-      this.editorKey += 1;
+    xoRoot: {
+      handler(next) {
+        if (next) this.isDataParsed = true;
+        else this.isDataParsed = false;
+
+        if (!this.writeModifiedFlag) {
+          // 1回目の変更イベントは、contents を表示したときのものなのでmodifiedは変更しない
+          this.writeModifiedFlag = true;
+        } else {
+          this.$store.commit('datastore/isModified', { isModified: true });
+          this.isDataChanged = true;
+        }
+      },
+      deep: true,
     },
   },
   async mounted() {
     this.$store.watch(
       (state, getters) => getters['datastore/fileState'],
-      ({ handle }) => {
-        if (handle) {
-          this.currentFileName = handle.name;
+      ({ handle, data }) => {
+        this.isFileSelected = (handle);
+        this.isBlankFile = (data === null || data === '');
+        this.isDataChanged = false;
+      },
+      {
+        deep: true,
+      },
+    );
+    this.$store.watch(
+      (state, getters) => getters['datastore/editorState'],
+      ({ xobject }) => {
+        if (xobject) {
+          this.xoRoot = xobject.root;
+          this.table.contents = this.xoRoot?.services?.service;
+          this.isDataParsed = true;
+        } else {
+          this.xoRoot = null;
+          this.table.contents = null;
+          this.isDataParsed = false;
         }
+        this.tableUpdate();
+      },
+      {
+        deep: true,
       },
     );
   },
@@ -80,12 +206,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  button {
-    font-size: 1rem;
-    width: 200px;
-    padding: .2rem 1rem;
-    &:hover {
-      box-shadow: 0 3px 5px rgba(0, 0, 0, .3);
+  @use "@/assets/styles/color.scss" as c;
+  .file-selecter {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    border-bottom: 1px black c.cp("black");
+  }
+  .file-selecter-support {
+    text-align: center;
+    margin: 1rem 0;
+  }
+  .save-btn {
+    display: flex;
+    span {
+      &:first-child {
+        display: flex;
+        svg {
+          width: 1rem;
+          margin-top: 1px;
+        }
+      }
     }
+  }
+  .table-support {
+    margin: 1rem 0;
+    text-align: center;
+  }
+  .table-action {
+    display: flex;
+    justify-content: space-between;
   }
 </style>

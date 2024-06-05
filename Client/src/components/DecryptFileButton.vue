@@ -4,34 +4,33 @@
 
 <script>
 export default {
-  name: 'DecryptButton',
+  name: 'DecryptFileButton',
   props: {
     label: {
       type: String,
       default: '複合化',
     },
   },
-  emits: ['ondecrypted'],
   methods: {
     /**
      * store の file を複合化する.
      * file がなければエラーを返す.
-     * エラー以外で処理が完了したら、'ondecrypted' を emit する.
      */
     async doDecrypt() {
       const { handle } = this.$store.getters['datastore/fileState'];
-      // handle チェック
-      if (!handle) throw new Error('Handle is null');
-      // 複合化 不要
+      if (!handle) return;
+      // Empty チェック
       if (this.$store.getters['datastore/isEmptyData']) {
-        this.$log.debug('Data is none');
-        this.$emit('ondecrypted');
+        this.$log.info('This file has no data.');
         return;
       }
-      // 複合化 要
+      // 複合化
       const password = await this.$dialog.prompt({ message: 'Enter PASSPHRASE for Data Decrypt' });
-      await this.$store.dispatch('datastore/decryptContent', { password });
-      this.$emit('ondecrypted');
+      try {
+        await this.$store.dispatch('datastore/decryptContent', { password });
+      } catch (error) {
+        this.$log.error('[DecryptFileButton]', error);
+      }
     },
   },
 };

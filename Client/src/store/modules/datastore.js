@@ -5,8 +5,8 @@ import {
 } from '@/lib/fs-helper';
 import { XMLBuilder } from '@/lib/fxbuilder.min';
 // import { XMLParser } from '@/lib/fxparser.min';
-import devTemplate from '@/formats/device-file-template.json';
 import { XMLParser } from '@/lib/fxparser.min';
+import axios from '@/lib/axios.min.js';
 import { base64ToArrayBuffer, arrayBufferToBase64 } from '@/lib/string_to_buffer';
 import webStorage from '@/lib/webstorage';
 import { encrypt, decrypt } from '@/lib/cypto';
@@ -42,15 +42,25 @@ const fileParser = async (fileHandle) => {
   return new Error('File access is denied');
 };
 
+/**
+ * datastore.default.XML からテンプレートの XML データを取得し、オブジェクトに変換する
+ */
+const DatastoreDefaultXML = await (async () => {
+  const response = await axios.get('/datastore.default.XML');
+  // console.info('DatastoreDefaultXML', DatastoreDefaultXML);
+  return fastXML.parser.parse(response.data);
+})();
+
 const initState = () => ({
+  isModified: false,
   file: {
     handle: null,
     id: null,
-    isModified: false,
     meta: null,
     data: null,
   },
   editor: {
+    isEmpty: false,
     xtext: null,
     xobject: null,
   },
@@ -71,45 +81,62 @@ export default {
     putFile: (state, {
       handle = undefined,
       id = undefined,
-      isModified = undefined,
       meta = undefined,
       data = undefined,
     }) => {
       const res = {};
       if (handle) res.handle = handle;
       if (id) res.id = id;
-      if (isModified) res.isModified = isModified;
       if (meta) res.meta = meta;
       if (data) res.data = data;
       Object.assign(state.file, res);
       return state.file;
     },
-    putEditor: (state, xmlObject) => {
-      let {
-        xtext, xobject,
-      } = xmlObject;
-      if (!xtext && !xobject) return;
-      if (!xtext) xtext = fastXML.builder.build(xobject);
-      if (!xobject) xobject = fastXML.parser.parse(xtext);
-      Object.assign(state.editor, { xtext, xobject });
+    /**
+     * state.editor を上書きする.
+     * xobject > xtext の順で優先される.
+     * @param {{ xobject: object, xtext: string }}
+     */
+    putEditor: (state, {
+      init = false,
+      xobject = undefined,
+      xtext = undefined,
+    }) => {
+      const editorState = {};
+      if (init) {
+        // 初期化する
+        editorState.xtext = null;
+        editorState.xobject = null;
+        editorState.isEmpty = false;
+      } else if (xobject) {
+        editorState.xobject = xobject;
+        editorState.xtext = fastXML.builder.build(xobject);
+      } else if (xtext) {
+        editorState.xtext = xtext;
+        editorState.xobject = fastXML.parser.parse(xtext);
+        if (xtext === '') editorState.isEmpty = true;
+      } else {
+        return;
+      }
+      Object.assign(state.editor, editorState);
     },
-    modified: (state) => {
-      if (!state.file.isModified) state.file.isModified = true;
+    isModified: (state, { isModified = true }) => {
+      state.isModified = isModified;
     },
   },
   getters: {
     isExistFileId: (state) => (fileId) => state.fileIds.includes(fileId),
-    isFileModified: (state) => state.file.isModified,
+    isModified: (state) => state.isModified,
     isEmptyData: (state) => (!state.file.data || state.file.data === ''),
     fileContentAsXML: (state) => {
-      const clone = devTemplate;
+      const clone = DatastoreDefaultXML;
       Object.assign(clone, { meta: state.file.meta, data: state.file.data });
       return fastXML.builder.build(clone);
     },
     fileState: (state) => state.file,
     editorState: (state) => {
       const { xtext, xobject } = state.editor;
-      if (!xtext) return { xtext: '', xobject: {} };
+      if (!xtext) return { xtext: null, xobject: null };
       return {
         xtext: xtext
           .replace(/\n+/g, '')
@@ -173,7 +200,7 @@ export default {
       const { handle } = getters.fileState;
       if (await verifyPermission(handle, true)) {
         await writeFile(handle, getters.fileContentAsXML);
-        commit('putFile', { isModified: false });
+        commit('isModified', { isModified: false });
         return true;
       }
       return false;
@@ -185,19 +212,20 @@ export default {
      */
     async addRecent({ dispatch }, { handle }) {
       const fileHandle = handle;
-      if (!fileHandle) return;
-      // If isSameEntry isn't available, we can't store the file handle
+      // isSameEntry が利用できないなら recents 機能は使えない
       if (!fileHandle.isSameEntry) {
-        console.warn('Saving of recents is unavailable.');
-        return;
+        throw new Error('Saving of recents is unavailable.');
       }
+      // WS から recents を取得
       const recents = await (await dispatch('fetch')).recentFiles();
-      // Loop through the list of recent files and make sure the file we're
-      // adding isn't already there. This is gross.
-      const inList = await Promise.all(recents.map((f) => fileHandle.isSameEntry(f)));
-      if (inList.some((val) => val)) return;
-      // Add the new file handle to the top of the list, and remove any old ones.
+      // recents ファイルリストを確認して、recents に追加するかどうかを判断する
+      for (let i = 0; i < recents.length; i += 1) {
+        // 同じ FileHandle が既にあれば終了する
+        if (fileHandle.isSameEntry(recents[i])) return;
+      }
+      // recents に追加する
       recents.unshift(handle);
+      // WS に recents を保存
       await (await dispatch('push')).recentFiles(recents);
     },
     /**
@@ -206,24 +234,20 @@ export default {
      * @returns {{ id: string, meta: {}, data: {} }|error} object(XML コンテンツ) か、エラーを返します
      */
     async selectFile({ commit, getters, dispatch }) {
-      const file = getters.fileState;
-      if (file.isModified) throw new Error('File is modified');
-      const handle = await (async () => {
-        try {
-          return await getFileHandle();
-        } catch (error) {
-          return null;
-        }
-      })();
-      if (!handle) throw new Error('No file selected');
+      if (getters.isModified) throw new Error('File is modified');
+      const handle = await getFileHandle();
       const { meta, data } = await fileParser(handle);
+      // 選択されたファイルの Device File ID をもとに、既知のファイルか確認する
+      // 既知のファイルでなければ、利用できない
       const id = meta.devicefileid;
+      // WS から DeviceFileID のリストを取得
       const fileIds = (await dispatch('fetch')).fileIds();
       if (!fileIds.includes(id)) {
-        throw new Error('Unknown File ID in this browser');
+        throw new Error('That file is not available in this browser.');
       }
+      // 既知のファイルなら state.file に上書きする
       commit('putFile', {
-        handle, id, isModified: false, meta, data,
+        handle, id, meta, data,
       });
       return { id, meta, data };
     },
@@ -234,50 +258,68 @@ export default {
      * @param {object<FileSystemFileHandle>} handle
      * @returns {{ id: string, meta: {}, data: string|null }}
      */
-    async plugFile({ dispatch, commit }, { handle }) {
-      if (!handle) throw new Error('No file selected');
+    async plugFile({ dispatch, getters, commit }, { handle }) {
+      if (getters.isModified) throw new Error('File is modified');
+      // 当該 FileHandle に対する権限を確認
       const verification = await verifyPermission(handle, false);
+      // 権限あり
       if (verification) {
         const { meta, data } = await fileParser(handle);
+        // 選択されたファイルの Device File ID をもとに、既知のファイルか確認する
+        // 既知のファイルでなければ、利用できない
         const id = meta.devicefileid;
+        // WS から DeviceFileID のリストを取得
         const fileIds = (await dispatch('fetch')).fileIds();
         if (!fileIds.includes(id)) {
-          throw new Error('Unknown File ID in this browser');
+          throw new Error('That file is not available in this browser.');
         }
+        // 既知のファイルなら state.file に上書きする
         commit('putFile', {
-          handle, id, isModified: false, meta, data,
+          handle, id, meta, data,
         });
         return { id, meta, data };
       }
-      return new Error('File cannot be set');
+      // 権限なし
+      return new Error('No permissions on this file');
     },
     /**
-     * ファイルを作成し、state.file を上書きします.
-     * ファイル ID 新規作成、recentFIles への登録など.
-     * ファイルへの書き込みはしません.
+     * ファイルを作成し、DeviceFileID を発行して、state.file に上書きします.
+     * これと同時に putFileKey の操作が必要.
      * @param {object<VuexContext>}
      * @returns {{ handle: object<FileSystemFileHandle>, id: string }|error}
      */
-    async createFile({ getters, dispatch, commit }) {
-      if (getters.isFileModified) throw new Error('File is modified');
-      const handle = await (async () => {
-        try {
-          return await getNewFileHandle('AccountStore_by_hashed-potato.xml');
-        } catch (error) {
-          return null;
-        }
-      })();
-      if (!handle) throw new Error('No file created');
+    async createFile({ getters, commit }) {
+      if (getters.isModified) throw new Error('File is modified');
+      // ファイルを作成し、DeviceFileID を発行して、state.file に上書きする
+      const handle = await getNewFileHandle('AccountStore_by_hashed-potato.xml');
       const id = uuidv4();
       commit('putFile', {
-        handle, id, isModified: false, meta: null, data: null,
+        handle, id, meta: null, data: null,
       });
-      // もしファイルが初期化されない場合、ファイルにIDが書き込まれないので注意
-      dispatch('addRecent', { handle });
-      const fileKeys = (await dispatch('fetch')).fileKeys();
-      fileKeys.unshift({ id, iv: null, salt: null });
-      (await dispatch('push')).fileKeys(fileKeys);
       return { handle, id };
+    },
+    /**
+     * DeviceFileID, IV, SALT を WS に登録します.
+     * IV, SALT が ArrayBuffer であることに注意.
+     * @param {object<VuexContext>}
+     * @param {{ id: string, iv: object<ArrayBuffer>, salt: object<ArrayBuffer> }}
+     */
+    async putFileKey({ dispatch }, { id, iv, salt }) {
+      if (!id || id === '') throw new Error('The value you tried to put in WS/fileKeys is invalid.');
+      const ivAsString = (iv) ? arrayBufferToBase64(iv) : '';
+      const saltAsString = (salt) ? arrayBufferToBase64(salt) : '';
+      // WS から FileKey の一覧を取得し、該当する DeviceFileID の KeySet を探す
+      const fileKeys = (await dispatch('fetch')).fileKeys();
+      const index = fileKeys.map((keyset) => keyset.id).indexOf(id);
+      if (index === -1) {
+        // KeySet がみつからないとき、fileKeys の先頭に新しい要素を追加する
+        fileKeys.unshift({ id, iv: ivAsString, salt: saltAsString });
+      } else {
+        // KeySet があったとき、新しい IV と SALT を入れる
+        Object.assign(fileKeys[index], { iv: ivAsString, salt: saltAsString });
+      }
+      // WS に新しい FileKey のリストを記録する
+      (await dispatch('push')).fileKeys(fileKeys);
     },
     /**
      * state.file のファイルをテンプレート XML で上書きします
@@ -285,57 +327,60 @@ export default {
      * @returns {{ handle: object<FileSystemFileHandle>, id: string }|error}
      */
     async initializeFile({ getters }) {
-      const file = getters.fileState;
-      if (!file.handle) throw new Error('No file selected');
-      if (file.isModified) throw new Error('File is modified');
-      if (verifyPermission(file.handle, true)) {
-        const temp = devTemplate;
-        temp.meta.devicefileid = file.id;
-        await writeFile(file.handle, fastXML.builder.build(temp));
-        return { handle: file.handle, id: file.id };
+      if (getters.isModified) throw new Error('File is modified');
+      const { handle, id } = getters.fileState;
+      // 当該 FileHandle に対する権限を確認
+      // 権限あり
+      if (verifyPermission(handle, true)) {
+        const newXML = DatastoreDefaultXML;
+        Object.assign(newXML, { meta: { devicefileid: id } });
+        await writeFile(handle, fastXML.builder.build(newXML));
+        return { handle, id };
       }
+      // 権限なし
       throw new Error('File cannot be initialized');
     },
-    /**
-     * state.file のファイルの中身(XML)を取り出し、パースして state.file に入れます
-     * @param {object<VuexContext>}
-     * @returns {{ meta: {}, data: {} }|error} object(XML コンテンツ) か、エラーを返します
-     */
-    async getFileContent({ getters, commit }, { isForce = false }) {
-      const { content, handle, isModified } = getters.fileState;
-      if (!handle) throw new Error('No file selected');
-      if (isModified) throw new Error('File is modified');
-      if (!isModified && content && !isForce) return content;
-      const { meta, data } = await fileParser(handle);
-      commit('putFile', { meta, data, isModified: false });
-      return { meta, data };
-    },
+    // /**
+    //  * state.file のファイルの中身(XML)を取り出し、パースして state.file に入れます
+    //  * @param {object<VuexContext>}
+    //  * @returns {{ meta: {}, data: {} }|error} object(XML コンテンツ) か、エラーを返します
+    //  */
+    // async getFileContent({ getters, commit }, { isForce = false }) {
+    //   const { content, handle, isModified } = getters.fileState;
+    //   if (isModified) throw new Error('File is modified');
+    //   if (!isModified && content && !isForce) return content;
+    //   const { meta, data } = await fileParser(handle);
+    //   commit('putFile', { meta, data, isModified: false });
+    //   return { meta, data };
+    // },
     /**
      * state.file ファイルのプライベートデータを複合化します.
-     * 複合化のための iv, salt は state.file に保存されます
      * 複合化したデータは state.editor に保存されます.
      * @param {object<VuexContext>}
      * @param {string} password
-     * @returns {{ xtext: object, xobject: object }|null|error} 複合化&パースされたプライベートデータ
+     * @returns {{ xtext: object, xobject: object }|error} 複合化&パースされたプライベートデータ
      */
     async decryptContent({ getters, dispatch, commit }, { password }) {
       const {
-        handle, id, data, // meta,
+        id, data,
       } = getters.fileState;
-      if (!handle) throw new Error('No file selected');
-      if (!data || data === '') {
-        commit('putEditor', { xtext: '' });
-        return null;
+      if (data === null || data === '') {
+        // 新規ファイル等の理由でプライベートデータがない場合、カラデータを state.editor に入れる
+        commit('putEditor', { xobject: {} });
+      } else {
+        // プライベートデータがある場合
+        // WS から当該 IV, SALT を取得
+        const { index, iv, salt } = (await dispatch('fetch')).getKeySet(id);
+        if (index === -1) throw new Error('No cypto key');
+        // プライベートデータ と、取得した Keys は base64 エンコードされているため、ArrayBuffer に変換する
+        const ivAB = base64ToArrayBuffer(iv);
+        const saltAB = base64ToArrayBuffer(salt);
+        const cipher = base64ToArrayBuffer(data);
+        // 複合化して、state.editor に入れる
+        const xtext = await decrypt({ iv: ivAB, salt: saltAB }, cipher, password);
+        commit('putEditor', { xtext });
       }
-      const { index, iv, salt } = (await dispatch('fetch')).getKeySet(id);
-      const ivAB = base64ToArrayBuffer(iv);
-      const saltAB = base64ToArrayBuffer(salt);
-      if (index === -1) throw new Error('No cypto key');
-      const cipher = base64ToArrayBuffer(data);
-      const plainText = await decrypt({ iv: ivAB, salt: saltAB }, cipher, password);
-      const plainObject = fastXML.parser.parse(plainText);
-      commit('putEditor', { xtext: plainText, xobject: plainObject });
-      return { xtext: plainText, xobject: plainObject };
+      return id;
     },
     /**
      * state.editor ファイルのプライベートデータを暗号化し、state.file に上書きします
@@ -347,38 +392,23 @@ export default {
      *  data: {{ handle: object<FileSystemFileHandle>, id: string, data: string }} }|error}
      */
     async encryptContent({ getters, commit, dispatch }, { password }) {
-      const {
-        handle, id, isModified,
-      } = getters.fileState;
-      const {
-        xtext,
-      } = getters.editorState;
-      if (!handle) throw new Error('No file selected');
-      if (!isModified) throw new Error('No change');
+      if (!getters.isModified) throw new Error('No change');
+      const { handle, id } = getters.fileState;
+      const { xtext } = getters.editorState;
+      // xtext がカラのとき、暗号化するものはない
       if (!xtext || xtext === '') {
         throw new Error('No content');
       }
+      // 暗号化する
       const crypto = await encrypt(xtext, password);
-      (async () => {
-        const fileKeys = (await dispatch('fetch')).fileKeys();
-        const { index } = (await dispatch('fetch')).getKeySet(id);
-        Object.assign(fileKeys[index], {
-          iv: arrayBufferToBase64(crypto.iv),
-          salt: arrayBufferToBase64(crypto.salt),
-        });
-        (await dispatch('push')).fileKeys(fileKeys);
-      })();
-      const newData = arrayBufferToBase64(crypto.cipher);
-      commit('putFile', {
-        data: newData,
-        isModified: true,
-      });
-      commit('putEditor', {
-        xtext: null,
-        xobject: null,
-      });
+      // 暗号化で使用した IV, SALT を WS に記録する
+      await dispatch('putFileKey', { id, iv: crypto.iv, salt: crypto.salt });
+      // 暗号化されたデータ(ArrayBuffer) を Base64 でエンコードして state.file に入れる
+      const data = arrayBufferToBase64(crypto.cipher);
+      commit('putFile', { data });
+      commit('putEditor', { init: true });
       if (await dispatch('writeOutFile')) {
-        return { handle, id, data: newData };
+        return { handle, id, data };
       }
       throw new Error('File cannot be output');
     },

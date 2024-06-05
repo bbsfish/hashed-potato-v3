@@ -1,11 +1,12 @@
 <template>
   <div className="config">
-    <AppMainHeader title="Config"/>
+    <AppMainHeader title="Config" description="各種設定." />
     <div>
-      <p>
-        各種設定.
-      </p>
-      <button @click="clearIndexDB">Clear IndexedDB</button>
+      <button @click="clearWSCasheAll">ブラウザデータを削除する</button>
+    </div>
+    <div>
+      <button @click="doAnyFunction">Function</button>
+      <button @click="clearIndexedDB">Clear IndexedDB</button>
       <button @click="clearLocalStorage">Clear Local Storage</button>
       <button @click="doSelectFile">Select File</button>
       <button @click="doCreateFile">Create File</button>
@@ -21,7 +22,7 @@
 </template>
 
 <script>
-import { clear } from 'idb-keyval';
+import { clear as clearIDBKv } from 'idb-keyval';
 import AppMainHeader from '@/components/AppMainHeader.vue';
 import webStorage from '@/lib/webstorage';
 
@@ -31,6 +32,16 @@ export default {
     AppMainHeader,
   },
   methods: {
+    async doAnyFunction() {
+      this.$log.debug(webStorage.keys());
+    },
+    async clearWSCasheAll() {
+      const message = '実行するとデータストアが開けなくなる可能性があります。実行してもよろしいですか？';
+      if (this.$dialog.confirm({ message })) {
+        webStorage.clear();
+        clearIDBKv();
+      }
+    },
     async doSelectFile() {
       try {
         const result = await this.$store.dispatch('datastore/selectFile');
@@ -136,7 +147,7 @@ export default {
       this.$log.info('State', 'recentFiles', this.$store.getters['datastore/recentFiles']);
     },
     async clearIndexDB() {
-      clear();
+      clearIDBKv();
       this.$log.info('IndexedDB is cleared');
     },
     async clearLocalStorage() {

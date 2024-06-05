@@ -25,12 +25,12 @@
       <h4>Credential</h4>
       <label for="credential_id">
         <span>ID</span>
-        <input v-model="srv.crd.id"
+        <input v-model="srv.credential.id"
           type="text" name="credential_id" id="credential_id" />
       </label>
       <label for="credential_password">
         <span>Password</span>
-        <input v-model="srv.crd.password"
+        <input v-model="srv.credential.password"
           type="text" name="credential_password" id="credential_password" />
       </label>
     </div>
@@ -62,7 +62,7 @@ export default {
       srv: {
         id: this.service?.id,
         scope: this.service?.scope,
-        crd: {
+        credential: {
           id: this.service?.credential?.id,
           password: this.service?.credential?.password,
         },
@@ -115,7 +115,9 @@ export default {
       margin-left: 1rem;
       display: block;
       span {
-        margin-right: 1rem;
+        // margin-right: 1rem;
+        display: inline-block;
+        width: 7rem;
       }
     }
     button {
