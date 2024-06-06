@@ -5,25 +5,24 @@
       <button @click="showDialog">ShowDialog</button>
     </div>
   </div>
-  <AppDialogPrompt ref="dialog" />
 </template>
 
 <script>
 import AppMainHeader from '@/components/AppMainHeader.vue';
-import AppDialogPrompt from './components/AppDialogPrompt.vue';
 
 export default {
   name: 'DevelopperView',
   components: {
-    AppMainHeader, AppDialogPrompt,
+    AppMainHeader,
   },
   data() {
     return {
+      dialogVisibility: false,
     };
   },
   methods: {
-    showDialog() {
-      this.$dialog.prompt({ message: 'hello', comp: this.dialog });
+    async showDialog() {
+      console.log(await this.$dialog.prompt({ message: 'OK', forceNull: true }));
     },
   },
 };

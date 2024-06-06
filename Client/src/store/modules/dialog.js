@@ -1,16 +1,16 @@
 const initState = ({
-  prompt: null,
+  ref: null,
 });
 
 export default {
   namespaced: true,
   state: initState,
   mutations: {
-    ref: (state, { prompt }) => {
-      if (prompt) state.prompt = prompt;
+    ref: (state, ref) => {
+      if (ref) state.ref = ref;
     },
   },
   getters: {
-    ref: (state) => (key) => state[key],
+    ref: (state) => state.ref,
   },
 };

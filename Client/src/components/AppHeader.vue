@@ -11,7 +11,7 @@
           <router-link to='/start'>Start</router-link>
         </li>
         <li>
-          <router-link to='/content'>View</router-link>
+          <router-link to='/content'>Editor</router-link>
         </li>
         <li>
           <router-link to='/config'>Config</router-link>

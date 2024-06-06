@@ -30,7 +30,6 @@ export default {
   @use "@/assets/styles/mediaquery.scss" as m;
   @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
   // @import '@/assets/styles/the-new-css-reset.css';
-
   /* Variables */
   :root {
     --trs-duration: .6s;
@@ -115,4 +114,7 @@ export default {
       margin: .2rem 0 1rem 0;
     }
   }
+</style>
+<style lang="scss">
+  @use "@/assets/styles/app-dialog.scss";
 </style>

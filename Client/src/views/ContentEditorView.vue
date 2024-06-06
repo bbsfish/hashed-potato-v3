@@ -1,6 +1,6 @@
 <template>
   <div className="content-editor">
-    <AppMainHeader title="Content Editor" description="ファイル内容の参照および編集ができます." />
+    <AppMainHeader title="Content Editor" description="データストアの参照および編集ができます" />
     <div class="file-selecter">
       <SelectRecents label="最近のファイルから選択" />
       <SelectFileButton label="デバイスから選択" />

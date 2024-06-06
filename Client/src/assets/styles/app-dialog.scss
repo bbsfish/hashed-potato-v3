@@ -1,0 +1,68 @@
+@use "@/assets/styles/color.scss" as c;
+
+dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  // -webkit- transform: translateY(-50%) translateX(-50%);
+  border-radius: .3rem;
+  width: 90vw;
+  max-width: 500px;
+  #app-dialog-header {
+    text-align: right;
+    padding: .3rem .5rem;
+    #app-dialog-xmark {
+      transition: .6s;
+      width: 1rem;
+      &:hover {
+        cursor: pointer;
+        opacity: .6;
+      }
+    }
+  }
+  #app-dialog-body {
+    padding: 0 1rem;
+    input {
+      font-size: 1.2rem;
+      width: 100%;
+      padding: .4rem .6rem; /*ボックスを大きくする*/
+      border-radius: 3px; /*ボックス角の丸み*/
+      border: 2px solid #ddd; /*枠線*/
+      box-sizing: border-box; /*横幅の解釈をpadding, borderまでとする*/
+      transition: .6s;
+      &:focus {
+        box-shadow: 0 0 5px 0 rgba(0, 0, 0, 1);
+        border: 2px solid #FFF !important;
+        outline: 0;
+      }
+    }
+  }
+  #app-dialog-footer {
+    padding: .5rem;
+    display: flex;
+    justify-content: space-between;
+    #app-dialog-reset {
+      padding: .2rem .5rem;
+      border: 0;
+      background-color: inherit;
+      color: rgb(0, 0, 255);
+      transition: .6s;
+      &:hover {
+        box-shadow: none;
+        color: rgb(0, 102, 255);
+      }
+    }
+    #app-dialog-submit {
+      padding: .2rem 1.8rem;
+      background-color: rgb(0, 0, 255);
+      border: 0;
+      color: white;
+      transition: .6s;
+      &:hover {
+        box-shadow: none;
+        background-color: rgb(0, 102, 255);
+      }
+    }
+  }
+}
