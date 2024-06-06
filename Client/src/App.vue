@@ -65,6 +65,7 @@ export default {
       }
 
       main {
+        margin: 0 auto;
         min-height: 100vh;
         max-width: 1200px;
       }
