@@ -1,2 +1,2 @@
 # hashed-potato v3
-WebApp: [https://bbsfish.github.io/hashed-potato-dev/](https://bbsfish.github.io/hashed-potato-dev/)
+WebApp: [https://hashed-potato-v3.vercel.app/#/](https://hashed-potato-v3.vercel.app/#/)
