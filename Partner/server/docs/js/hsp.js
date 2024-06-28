@@ -3,7 +3,7 @@ const hsp = {
   /**
    * @type {string} '%%type' が (リクエスト) type に、'%%rid' が requester_id にマッチ
    */
-  clientURL: 'http://localhost:8080/%%type/%%rid',
+  clientURL: 'http://localhost:8080/#/%%type/%%rid',
   options: {
     /** @type {string} Requester ID */
     requester_id: 'sample-online-mall',

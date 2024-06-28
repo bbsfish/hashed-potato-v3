@@ -120,7 +120,7 @@ export default {
       }
       Object.assign(state.editor, editorState);
     },
-    isModified: (state, { isModified = true }) => {
+    isModified: (state, isModified = true) => {
       state.isModified = isModified;
     },
   },

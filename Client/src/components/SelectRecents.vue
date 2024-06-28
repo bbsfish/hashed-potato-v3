@@ -32,6 +32,7 @@ export default {
       default: '--- Select Recent Files:',
     },
   },
+  emits: ['onselected'],
   data() {
     return {
       histories: [],
@@ -44,6 +45,7 @@ export default {
       const selectedFileHandle = this.histories[idx];
       this.$log.debug('Selected Recent File:', '\nIndex:', idx, '\nItem:', selectedFileHandle);
       this.setFileToState(selectedFileHandle);
+      this.$emit('onselected');
     },
     async setFileToState(handle) {
       try {

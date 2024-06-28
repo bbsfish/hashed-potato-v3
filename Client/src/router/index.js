@@ -12,6 +12,7 @@ import StartView from '@/views/StartView.vue';
 import ServiceGenView from '@/views/ServiceGenView.vue';
 import ConfigView from '@/views/ConfigView.vue';
 import DevelopperView from '@/views/DevelopperView.vue';
+import ReferenceView from '@/views/ReferenceView.vue';
 import ContentEditorView from '@/views/ContentEditorView.vue';
 import PubkeyView from '@/views/PubkeyView.vue';
 
@@ -35,6 +36,11 @@ const routes = [
     path: '/dev',
     name: 'DevelopperPage',
     component: DevelopperView,
+  },
+  {
+    path: '/reference',
+    name: 'ReferencePage',
+    component: ReferenceView,
   },
   {
     path: '/signin',

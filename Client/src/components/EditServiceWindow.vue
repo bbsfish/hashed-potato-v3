@@ -119,6 +119,20 @@ export default {
         display: inline-block;
         width: 7rem;
       }
+      input {
+        font-size: 1.2rem;
+        width: 100%;
+        padding: .4rem .6rem; /*ボックスを大きくする*/
+        border-radius: 3px; /*ボックス角の丸み*/
+        border: 2px solid #ddd; /*枠線*/
+        box-sizing: border-box; /*横幅の解釈をpadding, borderまでとする*/
+        transition: .6s;
+        &:focus {
+          box-shadow: 0 0 5px 0 rgba(0, 0, 0, 1);
+          border: 2px solid #FFF !important;
+          outline: 0;
+        }
+      }
     }
     button {
       margin-left: 1rem;

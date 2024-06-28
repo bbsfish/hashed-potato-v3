@@ -5,8 +5,8 @@
     <p>Check: {{ (check) ? 'OK' : 'ERROR' }}</p>
     <LinkFieldShow :fields='req' :key="req" />
     よければ、ファイルを選択
-    <SelectRecents />
-    <DecryptFileButton @ondecrypted='getService' />
+    <SelectRecents @onselected="isFileSelected = true" />
+    <DecryptFileButton v-if="isFileSelected" @ondecrypted='getService' />
     <h3>リクエスト内容</h3>
     <pre>
       {{ req }}
@@ -61,6 +61,16 @@ export default {
         identity: null,
         credential: null,
       },
+      /**
+       * XML Object の root 以下
+       * @type {{
+       *  services: { service: object<ServiceElement>[] },
+       *  youare: object<PersonalInfosElement>[]
+       * }}
+       */
+      xoRoot: null,
+      // ファイルが選択されているか
+      isFileSelected: false,
     };
   },
   methods: {
@@ -69,17 +79,19 @@ export default {
      * state.editor から xmlobject に XML コンテンツを移動
      * Resuester ID から Service を取得する
      */
-    async getService() {
+    async getService(editorState) {
       const rqID = this.req.ID;
 
       if (!this.$store.getters['datastore/isEmptyData']) {
+        const { xobject } = editorState;
         // Data ありのとき: アカウントの所持を確認
-        const { xobject } = this.$store.getters['datastore/editorState'];
+        console.log('xobject', xobject);
         this.$store.commit('xmlobject/putXmlObject', xobject);
         const service = this.$store.getters['xmlobject/getServiceById'](rqID);
+        console.log('service', service);
         if (service) {
           // アカウントあり
-          const consent = this.$dialog.confirm({
+          const consent = await this.$dialog.confirm({
             message: 'アカウントをすでに持っているようです. サインインするために、元のウェブサービスに戻りますか?',
           });
           if (consent) {
@@ -89,14 +101,13 @@ export default {
             return;
           }
           this.$log.info('キャンセルされました');
-          return;
+        } else {
+          this.onNewService();
         }
       } else {
         // Data なしのとき: xmlobject store を初期化
         this.$store.commit('xmlobject/initXmlObject');
       }
-
-      this.onNewService();
     },
     /**
      * getService でアカウント情報がないとき、新規サービスを登録する
@@ -128,7 +139,7 @@ export default {
       this.$store.commit('datastore/putEditor', {
         xobject: xmlObject,
       });
-      this.$store.commit('datastore/modified');
+      this.$store.commit('datastore/isModified');
       const password = await this.$dialog
         .prompt({ message: 'Enter PASSPHRASE for Data Encrypt' });
       await this.$store.dispatch('datastore/encryptContent', { password });
@@ -172,7 +183,7 @@ export default {
      * @returns {{
       * RedirectURI: string, Scope: string[], Type: string,
       * ID: string
-     * }|null}
+      * }|null}
      */
     this.req = await (async (id) => {
       try {
@@ -197,6 +208,13 @@ export default {
         return null;
       }
     })(this.id);
+
+    this.$store.watch(
+      (state, getters) => getters['datastore/fileState'],
+      ({ handle }) => {
+        if (handle) this.isFileSelected = true;
+      },
+    );
   },
 };
 

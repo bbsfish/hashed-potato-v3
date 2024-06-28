@@ -5,8 +5,8 @@
     <p>Check: {{ (check) ? 'OK' : 'ERROR' }}</p>
     <LinkFieldShow :fields='req' :key="req" />
     よければ、ファイルを選択
-    <SelectRecents />
-    <DecryptFileButton @ondecrypted='getService' />
+    <SelectRecents @onselected="isFileSelected = true" />
+    <DecryptFileButton v-if="isFileSelected" @ondecrypted='getService' />
     <h3>リクエスト内容</h3>
     <pre>
       {{ req }}
@@ -60,6 +60,7 @@ export default {
         credential: null,
       },
       personalInfo: null,
+      isFileSelected: false,
     };
   },
   methods: {
@@ -79,7 +80,8 @@ export default {
         if (service) {
           // アカウント発見
           this.localServiceInfo = service;
-          if (service.scope.includes('none')) {
+          this.postData.credential = service.credential;
+          if (!service.scope || service.scope.includes('none')) {
             delete this.postData.identity;
           } else {
             this.postData.identity = service.scope
@@ -106,16 +108,13 @@ export default {
       }
       this.$log.info('キャンセルされました');
     },
-    sendData() {
-      const consent = this.$dialog.confirm({
+    async sendData() {
+      const consent = await this.$dialog.confirm({
         message: '送信します. よろしいですか?',
       });
       if (consent) {
         const poster = new HttpPoster(this.req.RedirectURI);
-        poster.postWithJSON(HttpPoster.RESULT.AGREED, {
-          credential: this.info.credential,
-          info: this.personalInfo,
-        });
+        poster.postWithJSON(HttpPoster.RESULT.AGREED, this.postData);
         window.location.href = this.req.RedirectURI;
         return;
       }

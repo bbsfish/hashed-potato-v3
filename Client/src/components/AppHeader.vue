@@ -19,6 +19,9 @@
         <li>
           <router-link to='/dev'>Dev</router-link>
         </li>
+        <li>
+          <router-link to='/reference'>Reference</router-link>
+        </li>
       </ul>
     </nav>
   </div>
