@@ -1,10 +1,11 @@
-class XMLObject {
+class PrivateData {
   /**
    * XML オブジェクトデータ から、必要な情報を取り出すことができる.
    * なお、他のデータには一切影響を与えない.
    * @param {object} xmlobject XML オブジェクトデータ
    */
-  constructor(xmlobject) {
+  constructor(data) {
+    this.data = data;
     if (!XMLObject.checkFormat(xmlobject)) {
       throw new Error('無効なファイルです');
     }

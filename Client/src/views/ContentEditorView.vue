@@ -13,18 +13,36 @@
       :services="table.contents"
       @onedit="onTableEdit"
     />
+    <YouAreTableShow
+      :key="table.key"
+      :source="table.personalInfo"
+      @onedit="onTableEdit"
+    />
     <EditServiceWindow
       :key="edit.key"
       :service="edit.targetService"
       @onsave="onEditorSave"
       @oncancel="onEditorCancel"
     />
+    <PopupPromptWindow
+      v-if="piPopup.isOpened"
+      title="個人情報の編集"
+      :key="piPopup.key"
+      :body="piPopup.body"
+      @submit="onSaveInPIEditor"
+    />
     <div class="table-support">
       <button v-if="isFileSelected&&isBlankFile" @click="addDataIntoBlankFile">
         データがありません. データを追加しましょう!
       </button>
+      <button v-if="isFileSelected&&isBlankFile" @click="addDataIntoBlankFile">
+        個人情報がありません. 情報を追加しましょう!
+      </button>
       <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addData">
         データを追加する
+      </button>
+      <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addYouareData">
+        個人情報を追加する
       </button>
     </div>
     <div class="table-action">
@@ -33,7 +51,7 @@
       </button>
       <button v-if="isDataChanged&&writeModifiedFlag" @click="doSave"
         class="save-btn XMLEditor__saveBtn">
-        <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></span>
+        <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V173.3c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32H64zm0 96c0-17.7 14.3-32 32-32H288c17.7 0 32 14.3 32 32v64c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V128zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></span>
         <span>保存</span>
       </button>
     </div>
@@ -47,6 +65,8 @@ import ServiceTableShow from '@/components/ServiceTableShow.vue';
 import SelectRecents from '@/components/SelectRecents.vue';
 import SelectFileButton from '@/components/SelectFileButton.vue';
 import DecryptFileButton from '@/components/DecryptFileButton.vue';
+import YouAreTableShow from '@/components/YouAreTableShow.vue';
+import PopupPromptWindow from '@/components/PopupPromptWindow.vue';
 
 export default {
   name: 'ContentEditorView',
@@ -55,8 +75,10 @@ export default {
     SelectRecents,
     EditServiceWindow,
     ServiceTableShow,
+    YouAreTableShow,
     SelectFileButton,
     DecryptFileButton,
+    PopupPromptWindow,
   },
   data() {
     return {
@@ -83,15 +105,48 @@ export default {
       table: {
         key: 0,
         contents: null,
+        personalInfo: null,
       },
       edit: {
         targetService: null,
+        targetInfo: null,
         targetIndex: -1,
+        targetInfoIndex: -1,
         key: 0,
+      },
+      piPopup: {
+        isOpened: false,
+        key: 0,
+        body: [],
       },
     };
   },
   methods: {
+    async addYouareData() {
+      const { handle } = this.$store.getters['datastore/fileState'];
+      if (!handle) return;
+      if (!this.isBlankFile) {
+        this.piPopup.body = [
+          { type: 'title', text: 'Nickname' },
+          { type: 'hidden', name: 'pi-index', value: -1 },
+          { type: 'input', name: 'pi-nickname', value: '' },
+        ];
+        this.piPopup.key += 1;
+        this.piPopup.isOpened = true;
+      }
+    },
+    async onSaveInPIEditor(next) {
+      const nickname = next.find((row) => row.name === 'pi-nickname');
+      const piIndex = next.find((row) => row.name === 'pi-index');
+      const index = piIndex.value;
+      if (!('youare' in this.xoRoot)) this.xoRoot.youare = { info: [] };
+      if (index === -1) {
+        this.xoRoot.youare.info.push({ nickname: nickname.value });
+      } else {
+        console.log('this.xoRoot.youare.info', this.xoRoot.youare.info, index, this.xoRoot.youare.info[index]);
+        this.xoRoot.youare.info[index].nickname = nickname.value;
+      }
+    },
     async addData() {
       const { handle } = this.$store.getters['datastore/fileState'];
       if (!handle) return;
@@ -110,10 +165,21 @@ export default {
         this.onTableEdit({ index: 0, service: {} });
       }
     },
-    onTableEdit({ index, service }) {
-      this.edit.targetService = service;
-      this.edit.targetIndex = index;
-      this.edit.key += 1;
+    onTableEdit({ index, service, info }) {
+      console.log('onTableEdit', { index, service, info });
+      if (service) {
+        this.edit.targetService = service;
+        this.edit.targetIndex = index;
+        this.edit.key += 1;
+      } else {
+        this.piPopup.body = [
+          { type: 'title', text: info.key },
+          { type: 'hidden', name: 'pi-index', value: index },
+          { type: 'input', name: `pi-${info.key}`, value: info.value },
+        ];
+        this.piPopup.key += 1;
+        this.piPopup.isOpened = true;
+      }
     },
     onEditorSave({ service }) {
       const idx = this.edit.targetIndex;
@@ -129,6 +195,7 @@ export default {
       this.$log.debug('onCancel', service);
     },
     tableUpdate() {
+      this.table.personalInfo = this.xoRoot?.youare?.info;
       this.table.contents = this.xoRoot?.services?.service;
       this.table.key += 1;
     },
@@ -188,10 +255,12 @@ export default {
         if (xobject) {
           this.xoRoot = xobject.root;
           this.table.contents = this.xoRoot?.services?.service;
+          this.table.personalInfo = this.xoRoot?.youare?.info;
           this.isDataParsed = true;
         } else {
           this.xoRoot = null;
           this.table.contents = null;
+          this.table.personalInfo = null;
           this.isDataParsed = false;
         }
         this.tableUpdate();

@@ -14,7 +14,12 @@ import { encrypt, decrypt } from '@/lib/cypto';
 /**
  * XML Parser 設定
  */
-const ALWAYS_ARRAY_KEYS = ['root.services.service', 'root.services.service.account', 'root.services.service.scope'];
+const ALWAYS_ARRAY_KEYS = [
+  'root.services.service',
+  'root.services.service.account',
+  'root.services.service.scope',
+  'root.youare.info',
+];
 const fastXML = {
   // 常に配列にするキーリスト
   // コンストラクト
@@ -161,7 +166,7 @@ export default {
         return data;
       };
 
-      /**  @type {{ id: string, iv: string, salt: string: }} iv, salt は Base64 文字列 */
+      /**  @type {{ id: string, iv: string, salt: string }[]} iv, salt は Base64 文字列 */
       fetch.fileKeys = () => {
         const data = webStorage.get('fileKeys', []);
         return data;
@@ -211,18 +216,8 @@ export default {
      * @param {{ handle: object<FileSystemFileHandle> }}
      */
     async addRecent({ dispatch }, { handle }) {
-      const fileHandle = handle;
-      // isSameEntry が利用できないなら recents 機能は使えない
-      if (!fileHandle.isSameEntry) {
-        throw new Error('Saving of recents is unavailable.');
-      }
       // WS から recents を取得
       const recents = await (await dispatch('fetch')).recentFiles();
-      // recents ファイルリストを確認して、recents に追加するかどうかを判断する
-      for (let i = 0; i < recents.length; i += 1) {
-        // 同じ FileHandle が既にあれば終了する
-        if (fileHandle.isSameEntry(recents[i])) return;
-      }
       // recents に追加する
       recents.unshift(handle);
       // WS に recents を保存

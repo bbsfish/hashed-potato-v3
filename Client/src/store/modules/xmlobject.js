@@ -8,6 +8,7 @@ export default {
   state: initState(),
   mutations: {
     initXmlObject(state) {
+      console.log('initXmlObject', state);
       if (!('root' in state.xo) || typeof state.xo.root === 'string') {
         state.xo = { root: {} };
       }
@@ -24,7 +25,11 @@ export default {
       }
       console.debug('typeof r.youare', typeof r.youare);
       if (!('youare' in r) || typeof r.youare === 'string') {
-        r.youare = {};
+        r.youare = { info: {} };
+      }
+      console.debug('typeof r.youare', typeof r.youare);
+      if (!('info' in r.youare) || typeof r.youare.info === 'string') {
+        r.youare.info = [];
       }
       state.xo.root = r;
     },
@@ -39,8 +44,13 @@ export default {
         .findIndex((srv) => srv.id === id);
       if (idx > -1) state.xo.root.services.service[idx] = content;
     },
-    putPersonalInfo(state, { key, label, value }) {
-      state.xo.root.youare[key][label] = value;
+    putPersonalInfo(state, { key, value }) {
+      const { info } = state.xo.root.youare;
+      const existing = info.find((row) => (row.key === key && row.value === value));
+      if (!existing) {
+        info.push({ key, value });
+        state.xo.root.youare.info = info;
+      }
     },
     addKeyOfService(state) {
       state.xo.root.services.service = [];
@@ -51,7 +61,7 @@ export default {
     xmlObject: (state) => state.xo,
     root: (state) => state.xo?.root,
     services: (state) => state.xo?.root?.services?.service,
-    personalInfo: (state) => state.xo?.root?.youare,
+    personalInfo: (state) => state.xo?.root?.youare.info,
     getServiceById: (state, getters) => (serviceId) => {
       const servs = getters.services;
       console.debug('getServiceById', serviceId, 'in', servs);
@@ -61,12 +71,12 @@ export default {
       }
       return undefined;
     },
-    getPersonalInfoByKey: (state, getters) => (key, label = 'default') => {
-      const persinfo = getters.personalInfo;
-      if (key in persinfo) {
-        return persinfo[key][label];
-      }
-      return undefined;
+    getPersonalInfoByKey: (state, getters) => (key, isAll = false) => {
+      const info = getters.personalInfo;
+      const targets = info.filter((row) => (row.key === key));
+      if (targets.length === 0) return undefined;
+      if (!isAll) return targets[0];
+      return targets;
     },
   },
   actions: {

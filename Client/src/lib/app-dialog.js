@@ -100,6 +100,18 @@ const dialog = (() => {
     wrp.dialog.showModal();
   });
 
+  wrp.showAlert = (message) => new Promise((resolve, reject) => {
+    wrp.create();
+    wrp.setMessage(message);
+    // Reset ボタンは不要
+    wrp.dialog.querySelector('#app-dialog-reset').style.display = 'none';
+    wrp.setEventHandler({
+      onsubmit: (e) => resolve(true),
+      onreset: (e) => resolve(false),
+    });
+    wrp.dialog.showModal();
+  });
+
   wrp.destroy = () => {
     wrp.dialog.remove();
     wrp.dialog.querySelector('#app-dialog-reset')
@@ -122,6 +134,7 @@ export default {
       confirm: async ({ message = 'This is confirm. ok?' }) => {
         return new Promise(async (resolve, reject) => {
           const result = await dialog.showConfirm(message);
+          dialog.destroy();
           resolve(result);
         });
       },
@@ -131,6 +144,15 @@ export default {
           const result = await dialog.showPrompt(message);
           if (forceNull && result == '') resolve(null);
           else resolve(result);
+          dialog.destroy();
+        });
+      },
+
+      alert: async ({ message = 'This is prompt' }) => {
+        return new Promise(async (resolve, reject) => {
+          const result = await dialog.showAlert(message);
+          resolve(result);
+          dialog.destroy();
         });
       },
 

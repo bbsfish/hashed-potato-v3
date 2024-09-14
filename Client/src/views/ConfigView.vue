@@ -3,6 +3,8 @@
     <AppMainHeader title="Config" description="各種設定." />
     <div>
       <button @click="clearWSCasheAll">ブラウザデータを削除する</button>
+      <RemotePush innerText="データストアを移動する"/>
+      <RemoteFetch innerText="データストアをインポートする"/>
     </div>
     <div>
       <button @click="doAnyFunction">Function</button>
@@ -24,12 +26,14 @@
 <script>
 import { clear as clearIDBKv } from 'idb-keyval';
 import AppMainHeader from '@/components/AppMainHeader.vue';
+import RemotePush from '@/components/RemotePush.vue';
+import RemoteFetch from '@/components/RemoteFetch.vue';
 import webStorage from '@/lib/webstorage';
 
 export default {
   name: 'ContentView',
   components: {
-    AppMainHeader,
+    AppMainHeader, RemotePush, RemoteFetch,
   },
   methods: {
     async doAnyFunction() {

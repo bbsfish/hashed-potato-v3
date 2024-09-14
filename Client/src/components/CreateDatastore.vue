@@ -18,9 +18,9 @@ export default {
       try {
         const { handle, id } = await this.$store.dispatch('datastore/createFile');
         this.$log.debug('Created file', '\nID:', id, '\nFileHandle:', handle);
-        this.initFile();
-        this.saveFileID(id);
-        this.addHandleIntoRecentFiles(handle);
+        await this.initFile();
+        await this.saveFileID(id);
+        await this.addHandleIntoRecentFiles(handle);
       } catch (error) {
         this.$log.error(error);
       }
