@@ -1,0 +1,8 @@
+GET http://localhost:3000/store
+###
+POST http://localhost:3000/store HTTP/1.1
+content-type: application/json
+
+{
+    "name":"taro"
+}

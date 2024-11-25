@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partner Registration for Hashed Potato</title>
+  <style>
+    html {
+      font-size: 20px;
+    }
+
+    main {
+      width: 30rem;
+      margin: 0 auto;
+    }
+
+    form label {
+      display: block;
+    }
+
+    form input[type=text] {
+      width: calc(100% - 1.2rem - 4px);
+      padding: .3rem .6rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    form input[type=submit] {
+      width: 20%;
+      font-size: 1rem;
+      margin: 1rem 0;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    p {
+      word-break: break-all;
+      color: white;
+      background-color: rgb(63, 63, 63);
+      padding: .6rem 1rem;
+      border-radius: .2rem;
+    }
+
+    button {
+      width: 20%;
+      font-size: 1rem;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1><a href="/">Hashed Potato Agent</a></h1>
+  </header>
+  <main>
+    <% if (PHASE === 'form') { %>
+      <form id="partner_data" method="post" action="/registration">
+        <h2>新しいパートナーIDを追加する</h2>
+        <label for="ipt_partner_id">
+          <span>Partner ID</span>
+        </label>
+        <input type="text" name="pid" id="ipt_partner_id" />
+        <input type="submit" value="追加" />
+      </form>
+    <% } %>
+    <% if (PHASE === 'error') { %>
+      <div>
+        <h2>その ID はすでに登録されています</h2>
+      </div>
+    <% } %>
+    <% if (PHASE === 'ok') { %>
+      <div>
+        <h2>生成されたトークン</h2>
+        <p id="txt">
+          <%= NEW_TOKEN %>
+        </p>
+        <button id="btn">コピーする</button>
+      </div>
+    <% } %>
+  </main>
+  <script>
+    const txt = document.getElementById('txt');
+    const btn = document.getElementById('btn');
+
+    btn.addEventListener('click', () => {
+      if (!navigator.clipboard) {
+        alert('残念。このブラウザは対応していません...');
+        return;
+      }
+
+      navigator.clipboard.writeText(txt.textContent)
+        .then(
+          () => alert('コピー成功👍'),
+          () => alert('コピー失敗😭')
+        );
+    });
+  </script>
+</body>
+
+</html>
