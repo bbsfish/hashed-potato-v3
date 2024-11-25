@@ -1,8 +1,14 @@
-<style>
-  * { zoom: 1.2; }
-</style>
-<h1><%= message %></h1>
-<h2><%= status %></h2>
-<pre>
-<%- stack %>
-</pre>
+<h1>パートナーサーバが取得したデータ</h1>
+<div id="preview"></div>
+<script>
+  setTimeout(() => {
+    setInterval(async () => {
+      const response = await fetch('/signeddata');
+      const signedData = await response.json();
+      if(!signedData.isNew) return;
+      const pre = document.createElement('pre');
+      pre.innerText = JSON.stringify(signedData);
+      document.querySelector('#preview').appendChild(pre);
+    }, 1000);
+  }, 1000 * 5);
+</script>

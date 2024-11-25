@@ -92,7 +92,7 @@ async function storePartnerData(req, res) {
     const now = new Date();
     const requested_time = now.getTime();
     const expires_time = now.getTime() + TIME_LIMIT;
-    const rId = token.generate(16);
+    const rId = token.generate(16).replaceAll('/', '.');
 
     db.run(
       `INSERT INTO receptions(
