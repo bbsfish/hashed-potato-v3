@@ -1,9 +1,6 @@
 const vschema = require('value-schema');
 
 export default {
-  type: vschema.string({
-    only: 'login_bridge',
-  }),
   redirect_uri: vschema.string({
     pattern: vschema.STRING.PATTERN.URI,
     trims: true,

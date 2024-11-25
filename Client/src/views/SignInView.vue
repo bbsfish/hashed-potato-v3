@@ -31,10 +31,6 @@ import DecryptFileButton from '@/components/DecryptFileButton.vue';
 import HttpPoster from '@/lib/http-poster.js';
 import signupvs from '@/formats/signup.vschema.js';
 
-// エージェント URL
-const ENDPOINT = 'https://script.google.com/macros/s/'
-  + 'AKfycbyUVtwxdl5rHLM1TTeLsSVidti3OdsHZQVEH1D_Z7hpFNwQ_CPK_Gi0WlUC7Dki7IJQ/exec';
-
 export default {
   name: 'SignInView',
   components: {
@@ -136,7 +132,6 @@ export default {
   },
   async mounted() {
     const logger = this.$log;
-    logger.info('Endpoint', ENDPOINT);
     // 受付 ID 入力
     this.id = this.$route.params.id;
     /**
@@ -149,7 +144,7 @@ export default {
      */
     this.req = await (async (id) => {
       try {
-        const response = await fetch(`${ENDPOINT}?reception_id=${id}`);
+        const response = await fetch(`http://localhost:3000/data/${id}`);
         /**
          * @type {{
           * redirect_uri: string, scope: string[], type: string,
