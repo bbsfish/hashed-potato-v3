@@ -3,6 +3,7 @@ const router = express.Router();
 const tojson = require('json-format');
 
 router.use(function(req, res, next) {
+  console.log(req.session);
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header(
@@ -18,10 +19,34 @@ router.use(function(req, res, next) {
   }
 });
 
-router.get('http://localhost:5500/login/')
-router.post('/signup', view);
-router.post('/signin', view);
+/**
+ * ウェブサイト表示
+ */
+router.get('/', viewIndex);
+router.get('/signin', viewSignIn);
+router.get('/signup', viewSignUp);
 
+/**
+ * サインイン/サインアップ情報受け取りエンドポイント
+ * クライアントが情報を POST してくる
+ */
+router.post('/redirect', view);
+
+function viewIndex(req, res) {
+  res.render('index.ejs');
+}
+
+function viewSignIn(req, res) {
+  res.render('verification.ejs', {
+    VERIFICATION_TYPE: 'SignIn'
+  });
+}
+
+function viewSignUp(req, res) {
+  res.render('verification.ejs', {
+    VERIFICATION_TYPE: 'SignUp'
+  });
+}
 
 async function view(req, res) {
   const body = req.body;

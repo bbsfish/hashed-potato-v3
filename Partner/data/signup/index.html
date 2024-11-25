@@ -65,24 +65,25 @@
     <main class="space">
 			<section class="formfield">
 				<form action="#" method="post" class="form">
-					<h1>ログイン</h1>
+					<h1>サインアップ</h1>
 					<label for="uid">
-						ID またはメールアドレス
+						希望 ID
 						<input type="text" name="uid" id="uid" autocomplete="off">
 					</label>
 					<label for="pass">
-						パスワード
+						新規パスワード
 						<input type="password" name="pass" id="pass" autocomplete="off">
 					</label>
 					<label for="submit_btn">
-						<input type="submit" value="ログイン" id="submit_btn">
+						<input type="submit" value="サインアップする" id="submit_btn">
 					</label>
 					<p class="form-border">または</p>
 					<div class="brand-list">
 						<li class="brand-item">
 							<label for="google-btn">
 								<button class="brand-button" name="google-btn" id="google-btn">
-									<svg class="brand-icon google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/></svg>
+									<svg class="brand-icon google" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                    <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/></svg>
 									<p class="brand-label">Google アカウント</p>
 								</button>
 							</label>
@@ -90,53 +91,20 @@
 						<li class="brand-item">
 							<label for="hashedpotato-btn">
 								<button class="brand-button" name="hashedpotato-btn" id="hashedpotato-btn">
-									<svg class="brand-icon hsp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M94.1 315.1c0 25.9-21.2 47.1-47.1 47.1S0 341 0 315.1c0-25.9 21.2-47.1 47.1-47.1h47.1v47.1zm23.7 0c0-25.9 21.2-47.1 47.1-47.1s47.1 21.2 47.1 47.1v117.8c0 25.9-21.2 47.1-47.1 47.1s-47.1-21.2-47.1-47.1V315.1zm47.1-189c-25.9 0-47.1-21.2-47.1-47.1S139 32 164.9 32s47.1 21.2 47.1 47.1v47.1H164.9zm0 23.7c25.9 0 47.1 21.2 47.1 47.1s-21.2 47.1-47.1 47.1H47.1C21.2 244 0 222.8 0 196.9s21.2-47.1 47.1-47.1H164.9zm189 47.1c0-25.9 21.2-47.1 47.1-47.1 25.9 0 47.1 21.2 47.1 47.1s-21.2 47.1-47.1 47.1h-47.1V196.9zm-23.7 0c0 25.9-21.2 47.1-47.1 47.1-25.9 0-47.1-21.2-47.1-47.1V79.1c0-25.9 21.2-47.1 47.1-47.1 25.9 0 47.1 21.2 47.1 47.1V196.9zM283.1 385.9c25.9 0 47.1 21.2 47.1 47.1 0 25.9-21.2 47.1-47.1 47.1-25.9 0-47.1-21.2-47.1-47.1v-47.1h47.1zm0-23.7c-25.9 0-47.1-21.2-47.1-47.1 0-25.9 21.2-47.1 47.1-47.1h117.8c25.9 0 47.1 21.2 47.1 47.1 0 25.9-21.2 47.1-47.1 47.1H283.1z"/></svg>
+									<svg class="brand-icon hsp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                    <path d="M94.1 315.1c0 25.9-21.2 47.1-47.1 47.1S0 341 0 315.1c0-25.9 21.2-47.1 47.1-47.1h47.1v47.1zm23.7 0c0-25.9 21.2-47.1 47.1-47.1s47.1 21.2 47.1 47.1v117.8c0 25.9-21.2 47.1-47.1 47.1s-47.1-21.2-47.1-47.1V315.1zm47.1-189c-25.9 0-47.1-21.2-47.1-47.1S139 32 164.9 32s47.1 21.2 47.1 47.1v47.1H164.9zm0 23.7c25.9 0 47.1 21.2 47.1 47.1s-21.2 47.1-47.1 47.1H47.1C21.2 244 0 222.8 0 196.9s21.2-47.1 47.1-47.1H164.9zm189 47.1c0-25.9 21.2-47.1 47.1-47.1 25.9 0 47.1 21.2 47.1 47.1s-21.2 47.1-47.1 47.1h-47.1V196.9zm-23.7 0c0 25.9-21.2 47.1-47.1 47.1-25.9 0-47.1-21.2-47.1-47.1V79.1c0-25.9 21.2-47.1 47.1-47.1 25.9 0 47.1 21.2 47.1 47.1V196.9zM283.1 385.9c25.9 0 47.1 21.2 47.1 47.1 0 25.9-21.2 47.1-47.1 47.1-25.9 0-47.1-21.2-47.1-47.1v-47.1h47.1zm0-23.7c-25.9 0-47.1-21.2-47.1-47.1 0-25.9 21.2-47.1 47.1-47.1h117.8c25.9 0 47.1 21.2 47.1 47.1 0 25.9-21.2 47.1-47.1 47.1H283.1z"/></svg>
 									<p class="brand-label">hashed potato アカウント</p>
 								</button>
 							</label>
 						</li>
 					</div>
-					<p class="form-border">アカウントを持っていない方</p>
-					<p class="form-border"><a href="/signup">会員登録 / サインアップ</a></p>
+					<p class="form-border">アカウントをお持ちの方</p>
+					<p class="form-border"><a href="/signin">ログイン</a></p>
 				</form>
 			</section>
     </main>
 
     <footer>
-
-      <div id="footermenu">
-        <ul>
-          <li class="title">メニュー見出し</li>
-          <li><a href="#">サンプルメニューサンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-        </ul>
-        <ul>
-          <li class="title">メニュー見出し</li>
-          <li><a href="#">サンプルメニューサンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-        </ul>
-        <ul>
-          <li class="title">メニュー見出し</li>
-          <li><a href="#">サンプルメニューサンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-          <li><a href="#">サンプルメニュー</a></li>
-        </ul>
-      </div>
-      <!--/#footermenu-->
-
-      <ul class="icons">
-        <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
-        <li><a href="#"><i class="fab fa-line"></i></a></li>
-        <li><a href="#"><i class="fab fa-youtube"></i></a></li>
-        <li><a href="#"><i class="fab fa-instagram"></i></a></li>
-      </ul>
 
       <div id="copyright">
         <small>Copyright&copy; <a href="index.html">Sample Online Mall</a> All Rights Reserved.</small>
@@ -200,7 +168,7 @@
   </script>
 
 	<!-- hashed potato 用スクリプト -->
-  <script src="../js/hsp.js" inline></script>
+  <script src="../js/hashed-potato-agent.js" inline></script>
 	<script>
     let excuted = false;
 		async function hashedpotatoBtnClick(e) {
@@ -208,14 +176,19 @@
 			e.preventDefault();
       excuted = true;
       loaderview.show();
-			hsp.bindOption('signin');
-			const result = await hsp.stock();
+      const agent = new HashedPotatoAgent(
+        'http://localhost:3000/store',
+        'sample-online-mall',
+        'KgplNlRSdqp0WAXNJO+ZPwyCj3g8uq4iVY5xU8q6uu+9Fn6toPLgMkYNDHpxaISIRBLQxOC+QWKUsIDKI1vZ0K2/TeuVJY07xjNuEhsb0+52QK0cKrDnR87VUwa8cJH1',
+      );
+			const result = await agent.post({ redirectURI: 'http://localhost:5500/redirect' });
+      console.log(result);
       loaderview.hide();
-			if (result !== null) {
+			if (result.ok) {
 				dialog.show({
 					title: 'リダイレクトされます',
-					message: `受付ID: "${result}"\nClient アプリケーションへリダイレクトします.\n`,
-					mainHandler: () => { window.location.href = hsp.bindClientURL(); },
+					message: `受付ID: "${result.reception_id}"\nClient アプリケーションへリダイレクトします.\n`,
+					mainHandler: () => { window.location.href = `http://localhost:8080/#/signup/${result.reception_id}`; },
 					// subHandler: dialog.close,
 				});
 			}

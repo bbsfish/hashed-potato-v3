@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<%- include('components/head.ejs'); %>
+	<link rel="stylesheet" href="/css/dialog.css">
+	<link rel="stylesheet" href="/css/loaderview.css">
+	<link rel="stylesheet" href="/css/verification-form.css">
+	<script src="/js/dialog.js" inline></script>
+	<script src="/js/loaderview.js" inline></script>
+	<script src="/js/hashed-potato-agent.js" inline></script>
+</head>
+
+<body>
+
+<div id="container">
+
+    <header>
+		<%- include('components/header.ejs'); %>
+    </header>
+
+    <!--開閉ブロック-->
+    <div id="menubar">
+		<%- include('components/menubar.ejs'); %>
+    </div>
+    <!--/#menubar-->
+
+    <main class="space">
+		<section class="formfield">
+			<form action="/signin" method="post" class="form">
+			<h1>
+				<%= (VERIFICATION_TYPE == 'SignIn') ? 'サインイン' : 'サインアップ' %>
+			</h1>
+			<div class="brand-list">
+				<li class="brand-item">
+				<label for="hashedpotato-btn">
+					<button class="brand-button" name="hashedpotato-btn" id="hashedpotato-btn">
+						<%- include('components/icon-slack.ejs'); %>
+						<p class="brand-label">hashed potato アカウント</p>
+					</button>
+				</label>
+				</li>
+			</div>
+			<% if (VERIFICATION_TYPE == 'SignIn') { %>
+				<p class="form-border">アカウントを持っていない方</p>
+				<p class="form-border"><a href="/signup">サインアップ</a></p>
+			<% } else { %>
+				<p class="form-border">アカウントを持っている方</p>
+				<p class="form-border"><a href="/signin">サインイン</a></p>
+			<% } %>
+			</form>
+		</section>
+    </main>
+
+    <footer>
+      <%- include('components/footer.ejs'); %>
+    </footer>
+
+</div>
+<!--/#container-->
+
+<!--ページの上部へ戻るボタン-->
+<div class="pagetop"><a href="#"><i class="fas fa-angle-double-up"></i></a></div>
+
+<!--開閉ボタン（ハンバーガーアイコン）-->
+<div id="menubar_hdr">
+<span></span><span></span><span></span>
+</div>
+
+<!--jQueryの読み込み-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!--文字サイズチェンジ用のスクリプト-->
+<script src="../js/fontSizeChanger.js"></script>
+
+<!--スライドショー（slick）-->
+<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<script src="../js/slick.js"></script>
+
+<!--このテンプレート専用のスクリプト-->
+<script src="../js/main.js"></script>
+
+<!-- ダイアログ画面テンプレート hashed potato 用 -->
+<div class="hsp dialog hide" id="hsp_dialog">
+	<div class="hsp dialog__header">
+		<h1 class="hsp dialog__header__title" id="hsp_dialog_title"></h1>
+	</div>
+	<div class="hsp dialog__body">
+		<p id="hsp_dialog_message"></p>
+	</div>
+	<div class="hsp dialog__footer">
+		<button class="hsp dialog__btn__sub" id="hsp_dialog_subbtn">キャンセル</button>
+		<button class="hsp dialog__btn__main" id="hsp_dialog_mainbtn">OK</button>
+	</div>
+</div>
+
+<!-- ローディング画面テンプレート hashed potato 用 -->
+<div id="loaderview" class="loaderview">
+	<p class="txt">通信中</p>
+</div>
+
+<script>
+	// ダイアログ画面およびローディング画面の初期化
+	window.addEventListener('load', (e) => {
+		dialog.init('#hsp_dialog');
+		loaderview.init('#loaderview');
+	});
+</script>
+
+<!-- hashed potato 用スクリプト -->
+<script>
+	let excuted = false;
+	async function hashedpotatoBtnClick(e) {
+		if (excuted) return;
+		e.preventDefault();
+		excuted = true;
+		loaderview.show();
+		const agent = new HashedPotatoAgent(
+			'http://localhost:3000/store',
+			'sample-online-mall',
+			'KgplNlRSdqp0WAXNJO+ZPwyCj3g8uq4iVY5xU8q6uu+9Fn6toPLgMkYNDHpxaISIRBLQxOC+QWKUsIDKI1vZ0K2/TeuVJY07xjNuEhsb0+52QK0cKrDnR87VUwa8cJH1',
+		);
+		const result = await agent.post({
+		redirectURI: 'http://localhost:5500/redirect'
+		});
+		console.log(result);
+		loaderview.hide();
+		if (result.ok) {
+		dialog.show({
+			title: 'リダイレクトされます',
+			message: `受付ID: "${result.reception_id}"\nClient アプリケーションへリダイレクトします.\n`,
+			mainHandler: () => {
+			window.location.href = `http://localhost:8080/#/<%= (VERIFICATION_TYPE == 'SignIn') ? 'signin' : 'signup' %>/${result.reception_id}`;
+			},
+			// subHandler: dialog.close,
+		});
+		}
+		excuted = false;
+		console.log(result);
+	}
+	document.querySelector('#hashedpotato-btn').addEventListener('click', hashedpotatoBtnClick);
+</script>
+
+</body>
+</html>
