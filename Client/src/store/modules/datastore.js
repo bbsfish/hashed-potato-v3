@@ -39,9 +39,12 @@ const fastXML = {
  */
 const fileParser = async (fileHandle) => {
   if (verifyPermission(fileHandle)) {
+    const startTime = performance.now();
     const file = await fileHandle.getFile();
     const fileText = await readFile(file);
     const object = fastXML.parser.parse(fileText);
+    const endTime = performance.now();
+    console.log('ファイルのパースにかかった時間: %s ミリ秒', endTime - startTime);
     return object;
   }
   return new Error('File access is denied');
@@ -204,7 +207,10 @@ export default {
     async writeOutFile({ getters, commit }) {
       const { handle } = getters.fileState;
       if (await verifyPermission(handle, true)) {
+        const startTime = performance.now();
         await writeFile(handle, getters.fileContentAsXML);
+        const endTime = performance.now();
+        console.log('ファイルの書き込みにかかった時間: %s ミリ秒', endTime - startTime);
         commit('isModified', { isModified: false });
         return true;
       }
@@ -372,7 +378,10 @@ export default {
         const saltAB = base64ToArrayBuffer(salt);
         const cipher = base64ToArrayBuffer(data);
         // 複合化して、state.editor に入れる
+        const startTime = performance.now();
         const xtext = await decrypt({ iv: ivAB, salt: saltAB }, cipher, password);
+        const endTime = performance.now();
+        console.log('複合化にかかった時間: %s ミリ秒', endTime - startTime);
         commit('putEditor', { xtext });
       }
       return id;
@@ -395,7 +404,10 @@ export default {
         throw new Error('No content');
       }
       // 暗号化する
+      const startTime = performance.now();
       const crypto = await encrypt(xtext, password);
+      const endTime = performance.now();
+      console.log('暗号化にかかった時間: %s ミリ秒', endTime - startTime);
       // 暗号化で使用した IV, SALT を WS に記録する
       await dispatch('putFileKey', { id, iv: crypto.iv, salt: crypto.salt });
       // 暗号化されたデータ(ArrayBuffer) を Base64 でエンコードして state.file に入れる

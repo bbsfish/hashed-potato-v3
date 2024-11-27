@@ -116,12 +116,12 @@
 		excuted = true;
 		loaderview.show();
 		const agent = new HashedPotatoAgent(
-			'http://localhost:3000/store',
+			'https://agent-dot-hashed-potato.uw.r.appspot.com/store',
 			'sample-online-mall',
 			'KgplNlRSdqp0WAXNJO+ZPwyCj3g8uq4iVY5xU8q6uu+9Fn6toPLgMkYNDHpxaISIRBLQxOC+QWKUsIDKI1vZ0K2/TeuVJY07xjNuEhsb0+52QK0cKrDnR87VUwa8cJH1',
 		);
 		const result = await agent.post({
-		redirectURI: 'http://localhost:5500/redirect'
+		redirectURI: 'https://hashed-potato.uw.r.appspot.com/redirect'
 		});
 		console.log(result);
 		loaderview.hide();
@@ -130,7 +130,7 @@
 			title: 'リダイレクトされます',
 			message: `受付ID: "${result.reception_id}"\nClient アプリケーションへリダイレクトします.\n`,
 			mainHandler: () => {
-			window.location.href = `http://localhost:8080/#/<%= (VERIFICATION_TYPE == 'SignIn') ? 'signin' : 'signup' %>/${result.reception_id}`;
+			window.location.href = `https://hashed-potato-v3.vercel.app/#/<%= (VERIFICATION_TYPE == 'SignIn') ? 'signin' : 'signup' %>/${result.reception_id}`;
 			},
 			// subHandler: dialog.close,
 		});
