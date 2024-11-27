@@ -116,31 +116,31 @@ async function storePartnerData(req, res) {
 
 async function getPartnerData(req, res) {
   const { receptionId } = req.params;
-
-  const receptions = {};
   try {
-    const db = new Partners();
-    const info = await db.get(
-      `SELECT * FROM receptions WHERE id = ?`,
-      [ receptionId ]
-    );
-    Object.assign(receptions, info);
+    const receptions = await (async () => {
+      const db = new Partners();
+      const info = await db.get(
+        `SELECT * FROM receptions WHERE id = ?`,
+        [ receptionId ]
+      );
+      return info;
+    })();
+
+    if (new Date().getTime() > receptions.expires_time) {
+      return res.json({
+        ok: false,
+        error: 'Reception ID expired',
+      });
+    }
+
+    Object.assign(receptions, { ok: true });
+    return res.json(receptions);
   } catch(err) {
     return res.json({
       ok: false,
       error: 'Invalid Reception ID',
     });
   }
-  
-  if (new Date().getTime() > receptions.expires_time) {
-    return res.json({
-      ok: false,
-      error: 'Reception ID expired',
-    });
-  }
-
-  Object.assign(receptions, { ok: true });
-  return res.json(receptions);
 }
 
 module.exports = router;
