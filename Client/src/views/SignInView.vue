@@ -1,6 +1,6 @@
 <template>
-  <div className="SignUp">
-    <AppMainHeader title="SignUp"/>
+  <div className="SignIn">
+    <AppMainHeader title="SignIn"/>
     <p>Reception ID: {{ id }}</p>
     <p>Check: {{ (check) ? 'OK' : 'ERROR' }}</p>
     <LinkFieldShow :fields='req' :key="req" />
@@ -144,7 +144,7 @@ export default {
      */
     this.req = await (async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/data/${id}`);
+        const response = await fetch(`https://agent-dot-hashed-potato.uw.r.appspot.com/data/${id}`);
         /**
          * @type {{
           * redirect_uri: string, scope: string[], type: string,
