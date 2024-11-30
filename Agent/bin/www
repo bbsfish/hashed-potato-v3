@@ -6,7 +6,14 @@
 
 const app = require('../app');
 const debug = require('debug')('agent:server');
-const http = require('http');
+const fs = require('fs');
+const https = require('https');
+
+// サーバ証明書と秘密鍵の読み込み
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/hashed-potato.mydns.jp/privkey.pem'), // 秘密鍵
+  cert: fs.readFileSync('/etc/letsencrypt/live/hashed-potato.mydns.jp/cert.pem')    // サーバ証明書
+};
 
 /**
  * Get port from environment and store in Express.
@@ -18,8 +25,7 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
-const server = http.createServer(app);
+const server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
