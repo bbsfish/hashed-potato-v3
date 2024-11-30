@@ -144,8 +144,8 @@ export default {
      */
     this.req = await (async (id) => {
       try {
-        console.log('Fetching from %s', `https://agent-dot-hashed-potato.uw.r.appspot.com/data/${id}`);
-        const response = await fetch(`https://agent-dot-hashed-potato.uw.r.appspot.com/data/${id}`);
+        console.log('Fetching from %s', `https://hashed-potato.mydns.jp/data/${id}`);
+        const response = await fetch(`https://hashed-potato.mydns.jp/data/${id}`);
         /**
          * @type {{
           * redirect_uri: string, scope: string[], type: string,
