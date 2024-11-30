@@ -1,4 +1,4 @@
-GET http://localhost:3000/store
+GET http://localhost:3000/data/kYx9zmqjCgGj0+QN
 ###
 POST http://localhost:3000/store HTTP/1.1
 content-type: application/json
