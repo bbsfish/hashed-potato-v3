@@ -182,7 +182,11 @@ export default {
      */
     this.req = await (async (id) => {
       try {
+        const startTime = performance.now();
+        console.log('Fetching from %s', `https://hashed-potato.mydns.jp/data/${id}`);
         const response = await fetch(`https://hashed-potato.mydns.jp/data/${id}`);
+        const endTime = performance.now();
+        console.log('エージェントサーバからの応答時間: %s ミリ秒', endTime - startTime);
         /**
          * @type {{
           * redirect_uri: string, scope: string[], type: string,
