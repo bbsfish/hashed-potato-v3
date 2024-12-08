@@ -37,7 +37,7 @@ router.get('/', viewRegistraion);
 router.post('/registration', registerPartnerId);
 router.post('/store', storePartnerData);
 router.get('/data/:receptionId', getPartnerData);
-router.get('/ping/:starttime', checkTime);
+router.get('/ping', checkTime);
 
 function viewRegistraion(req, res) {
   res.render('registraion.ejs', {
@@ -145,13 +145,7 @@ async function getPartnerData(req, res) {
 }
 
 function checkTime(req, res) {
-  const { starttime } = req.params;
-  const endtime = performance.now();
-  return res.json({
-    starttime: Number(starttime),
-    endtime,
-    difference: Number(starttime) - endtime,
-  });
+  return res.send('Hello!');
 } 
 
 module.exports = router;
