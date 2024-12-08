@@ -4,9 +4,9 @@ class HashedPotatoAgent {
 	 * @param {String} requesterId パートナー ID
 	 * @param {String} hash 自己証明用のトークン
 	 */
-	constructor(endpoint, requesterId, hash) {
+	constructor(requesterId, hash) {
 		/** @type {String} パートナー情報を送信する、エージェントサーバのエンドポイント */
-		this.ENDPOINT = endpoint;
+		this.ENDPOINT = 'https://hashed-potato.mydns.jp/store';
 		/** @type {String} パートナー ID */
 		this.REQUESTER_ID = requesterId;
 		/** @type {String} 自己証明用のトークン */
@@ -39,9 +39,19 @@ class HashedPotatoAgent {
 			type,
 		});
 		console.log('POST - %s\n%O', this.ENDPOINT, options);
+		const startTime = performance.now();
 		const response = await fetch(this.ENDPOINT, options);
+        const endTime = performance.now();
+        console.log('エージェントによる受付ID発行にかかった時間: %s ミリ秒', endTime - startTime);
 		const data = await response.json();
 		console.log('RESPONSE:', data);
 		return data;
+	}
+
+	async ping() {
+		const startTime = performance.now();
+		const response = await fetch(`https://hashed-potato.mydns.jp/ping/${startTime}`);
+		const data = await response.json();
+		console.log('エージェントへの導通時間: starttime=%s, endtime=%s, difference=%s', data.starttime, data.endtime, data.difference);
 	}
 };

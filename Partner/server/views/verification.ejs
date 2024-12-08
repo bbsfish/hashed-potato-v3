@@ -109,17 +109,18 @@
 
 <!-- hashed potato 用スクリプト -->
 <script>
+	const agent = new HashedPotatoAgent(
+		'sample-online-mall',
+		'KgplNlRSdqp0WAXNJO+ZPwyCj3g8uq4iVY5xU8q6uu+9Fn6toPLgMkYNDHpxaISIRBLQxOC+QWKUsIDKI1vZ0K2/TeuVJY07xjNuEhsb0+52QK0cKrDnR87VUwa8cJH1',
+	);
+	agent.ping();
 	let excuted = false;
 	async function hashedpotatoBtnClick(e) {
 		if (excuted) return;
 		e.preventDefault();
 		excuted = true;
 		loaderview.show();
-		const agent = new HashedPotatoAgent(
-			'https://hashed-potato.mydns.jp/store',
-			'sample-online-mall',
-			'KgplNlRSdqp0WAXNJO+ZPwyCj3g8uq4iVY5xU8q6uu+9Fn6toPLgMkYNDHpxaISIRBLQxOC+QWKUsIDKI1vZ0K2/TeuVJY07xjNuEhsb0+52QK0cKrDnR87VUwa8cJH1',
-		);
+		
 		const result = await agent.post({
 			redirectURI: 'https://hashed-potato.uw.r.appspot.com/redirect'
 		});
