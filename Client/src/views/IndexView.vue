@@ -11,46 +11,21 @@
         <router-link to="/start" className="keyvisual__start--btn">Get Started</router-link>
       </div>
     </div>
-    <section id="about">
-      <h1>概要 - HASHED POTATO とは</h1>
-      <hr>
-      <div className="document">
-        <h2>個人情報をローカルで取り扱うシングルサインオンシステム</h2>
-        <div>
-          ウェブサービスの急増によって、ユーザは日々複数のアカウントの管理を余儀なくされている。
-          これを受け、様々なシングルサインオン（SSO）のソリューションが開発・提供されており、
-          個人が SSO を利用するためには、そのような事業者の提供するサービスを利用することになる。
-          しかしこの状況は、「個人情報保護」と「プライバシー保護」の観点から、好ましいとは言えない。
-          そこで、これらの課題に対応した、新しい SSO システムを考案し、実装することが本研究の目的である。
-          このウェブサービスは、その実装された新しい SSO システムの一部であり、「クライアント」アプリケーションと呼ばれる。
-          HASHED POTATO とは、新しい SSO システム全体の名称だ。
-        </div>
-        <h2>従来の SSO サービスの課題</h2>
-        <div>
-          従来の SSO サービスには、次のふたつの課題がある。
-        </div>
-        <div>
-          <figure>
-              <img src="@/assets/img/fig-abstruct-1.png" alt="従来のSSOサービスのふたつの課題">
-              <figcaption></figcaption>
-          </figure>
-          <figure>
-              <img src="@/assets/img/fig-abstruct-2.png" alt="従来のSSOサービスのプライバシー保護上の懸念">
-              <figcaption></figcaption>
-          </figure>
-          <figure>
-              <img src="@/assets/img/fig-abstruct-3.png" alt="従来のSSOサービスの個人情報保護上の懸念">
-              <figcaption></figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
+    <AppMainHeader title="概要" description="Hashed Potato とは" />
+    <MarkdownParser pubfile="/doc/index.md" />
   </div>
 </template>
 
 <script>
+import AppMainHeader from '@/components/AppMainHeader.vue';
+import MarkdownParser from '@/components/MarkdownParser.vue';
+
 export default {
   name: 'IndexView',
+  components: {
+    AppMainHeader,
+    MarkdownParser,
+  },
 };
 </script>
 

@@ -4,7 +4,6 @@ import {
   getNewFileHandle, verifyPermission, writeFile, readFile, getFileHandle,
 } from '@/lib/fs-helper';
 import { XMLBuilder } from '@/lib/fxbuilder.min';
-// import { XMLParser } from '@/lib/fxparser.min';
 import { XMLParser } from '@/lib/fxparser.min';
 import axios from '@/lib/axios.min.js';
 import { base64ToArrayBuffer, arrayBufferToBase64 } from '@/lib/string_to_buffer';

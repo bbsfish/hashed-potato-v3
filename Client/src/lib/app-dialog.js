@@ -21,7 +21,7 @@ const dialog = (() => {
     })();
     wrp.prt = innerWrp;
     outer.appendChild(innerWrp);
-    console.log('[app-dialog.js] Dialog is mounted at', outer);
+    console.debug('[app-dialog.js] Dialog is mounted at', outer);
   }
 
   wrp.create = () => {

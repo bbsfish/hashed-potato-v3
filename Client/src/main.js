@@ -4,7 +4,7 @@ import { createApp } from 'vue';
 
 // eslint-disable-next-line
 import logger from '@/logger/vue.plugin.js';
-import appDialog from '@/lib/app-dialog';
+import dialog from '@/lib/app-dialog';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -14,7 +14,6 @@ const app = createApp(App);
 app.use(logger);
 app.use(router);
 app.use(store);
-
-app.use(appDialog, { test: 'ok' });
+app.use(dialog, { test: 'ok' });
 
 app.mount('#app');

@@ -50,8 +50,10 @@ class HashedPotatoAgent {
 
 	async ping() {
 		const startTime = performance.now();
-		const response = await fetch(`https://hashed-potato.mydns.jp/ping/${startTime}`);
-		const data = await response.json();
-		console.log('エージェントへの導通時間: starttime=%s, endtime=%s, difference=%s', data.starttime, data.endtime, data.difference);
+		const response = await fetch(`https://hashed-potato.mydns.jp/ping`);
+		const endTime = performance.now();
+		const data = await response.text();
+		console.log(data);
+		console.log('エージェントへの導通時間: starttime=%s, endtime=%s, difference=%s', startTime, endTime, startTime-endTime);
 	}
 };

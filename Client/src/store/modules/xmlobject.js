@@ -9,7 +9,7 @@ export default {
   mutations: {
     initXmlObject(state) {
       console.log('initXmlObject', state);
-      if (!('root' in state.xo) || typeof state.xo.root === 'string') {
+      if (state.xo === null || !('root' in state.xo) || typeof state.xo.root === 'string') {
         state.xo = { root: {} };
       }
       console.debug('typeof state.xo.root', typeof state.xo.root);
@@ -87,15 +87,17 @@ export default {
      */
     addService: ({ getters, commit }, { id, object = {} }) => {
       const servs = (() => {
-        const sv = getters.services;
-        if (sv) return sv;
+        if ('service' in getters.services) {
+          return getters.services.service;
+        }
         commit('addKeyOfService');
-        return getters.services;
+        return [];
       })();
       if (getters.getServiceById(id)) throw new Error('Service ID が重複しています');
       const newBlock = object;
       Object.assign(newBlock, { id });
       servs.push(newBlock);
+      commit('putServices', servs);
       console.debug('Service ブロックを追加, 追加分:', newBlock, ', 結果:', servs);
       return { id, object };
     },

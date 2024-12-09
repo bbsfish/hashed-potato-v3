@@ -78,6 +78,8 @@ export default {
     async getService(editorState) {
       const rqID = this.req.ID;
 
+      console.debug('RQID', rqID);
+
       if (!this.$store.getters['datastore/isEmptyData']) {
         const { xobject } = editorState;
         // Data ありのとき: アカウントの所持を確認
@@ -103,6 +105,7 @@ export default {
       } else {
         // Data なしのとき: xmlobject store を初期化
         this.$store.commit('xmlobject/initXmlObject');
+        this.onNewService();
       }
     },
     /**

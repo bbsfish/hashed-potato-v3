@@ -6,11 +6,10 @@ import logger from '@/logger/vuex.plugin.js';
 
 import datastore from './modules/datastore';
 import xmlobject from './modules/xmlobject';
-import dialog from './modules/dialog';
 
 export default createStore({
   modules: {
-    datastore, xmlobject, dialog,
+    datastore, xmlobject,
   },
   plugins: [
     // createPersistedState({

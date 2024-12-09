@@ -8,13 +8,9 @@ import IndexView from '@/views/IndexView.vue';
 import SignInView from '@/views/SignInView.vue';
 import SignUpView from '@/views/SignUpView.vue';
 import StartView from '@/views/StartView.vue';
-// import ContentView from '@/views/ContentView.vue';
-import ServiceGenView from '@/views/ServiceGenView.vue';
 import ConfigView from '@/views/ConfigView.vue';
-import DevelopperView from '@/views/DevelopperView.vue';
 import ReferenceView from '@/views/ReferenceView.vue';
 import ContentEditorView from '@/views/ContentEditorView.vue';
-import PubkeyView from '@/views/PubkeyView.vue';
 
 const routes = [
   {
@@ -31,11 +27,6 @@ const routes = [
     path: '/config',
     name: 'ConfigPage',
     component: ConfigView,
-  },
-  {
-    path: '/dev',
-    name: 'DevelopperPage',
-    component: DevelopperView,
   },
   {
     path: '/reference',
@@ -70,22 +61,6 @@ const routes = [
     path: '/content',
     name: 'ContentPage',
     component: ContentEditorView,
-  },
-  {
-    path: '/sg',
-    name: 'SGPage',
-    component: ServiceGenView,
-    props: { mode: 'generate' },
-  },
-  {
-    path: '/sg/redirect',
-    name: 'SGRedirectPage',
-    component: ServiceGenView,
-    props: { mode: 'redirect' },
-  },
-  {
-    path: '/pubkey',
-    component: PubkeyView,
   },
 ];
 
