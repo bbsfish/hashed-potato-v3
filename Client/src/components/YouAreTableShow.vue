@@ -5,15 +5,13 @@
       <thead>
         <tr>
           <th scope="col">Key</th>
-          <th scope="col">Index</th>
           <th scope="col">Value</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(row, index) of rows" :key="index"
-          @click="onEditData(row.id)">
+          @click="onEditData(row.key)">
           <td>{{ row.key }}</td>
-          <td>{{ row.id }}</td>
           <td>{{ row.value }}</td>
         </tr>
       </tbody>
@@ -25,10 +23,7 @@
 export default {
   name: 'YouAreTabelShow',
   props: {
-    /** @type {{
-     *    key: string,
-     *    value: string,
-     *  }[]} */
+    /** @type {Object} */
     source: {
       type: Object,
       default: (() => {})(),
@@ -38,42 +33,23 @@ export default {
   data() {
     return {
       isValid: false,
-      srcNeo: [],
       rows: [],
     };
   },
   methods: {
-    onEditData(id) {
-      const target = this.srcNeo.find((row) => row.id === id);
-      this.$emit('onedit', { index: id - 1, info: target });
+    onEditData(key) {
+      const target = this.rows.find((row) => row.key === key);
+      this.$emit('onedit', { dataType: target.key, value: target.value });
     },
   },
   created() {
     const { source } = this;
     if (!source || source === null) return;
 
-    // Source を成形して ID やキーにアクセスしやすくする
-    this.srcNeo = source.map((row, index) => {
-      const key = Object.keys(row)[0];
-      return {
-        id: index + 1, key, value: row[key],
-      };
-    });
-
-    const { srcNeo } = this;
-
-    // SrcNeo の順番を並べ替える
-    let nextRows = [];
-    const keys = [];
-    srcNeo.forEach((row) => {
-      const curtKey = row.key;
-      if (!(keys.includes(curtKey))) {
-        const rowsHavingTheKey = srcNeo.filter((row2) => row2.key === curtKey);
-        nextRows = nextRows.concat(rowsHavingTheKey);
-        keys.push(curtKey);
-      }
-    });
-    this.rows = nextRows;
+    this.rows = Object.keys(source).map((key) => ({
+      key,
+      value: source[key],
+    }));
 
     this.isValid = true;
   },

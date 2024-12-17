@@ -124,6 +124,15 @@ export default {
         id: 'hogehoge',
         password: genPassword(),
       };
+      this.postData.credential = this.newAccount;
+      if (!this.req.Scope || this.req.Scope.includes('none')) {
+        delete this.postData.identity;
+      } else {
+        this.postData.identity = {};
+        this.req.Scope.forEach((key) => {
+          this.postData.identity[key] = this.$store.getters['xmlobject/getPersonalInfoByKey'](key);
+        });
+      }
     },
     /**
      * サインアップ情報を datastore/editorState におく
@@ -149,12 +158,8 @@ export default {
       }
     },
     async doRedirect() {
-      const createdAccount = this.newAccount;
       const poster = new HttpPoster(this.req.RedirectURI);
-      poster.postWithJSON(HttpPoster.RESULT.AGREED, {
-        credential: createdAccount,
-        info: this.personalInfo,
-      });
+      poster.postWithJSON(HttpPoster.RESULT.AGREED, this.postData);
       window.location.href = this.req.RedirectURI;
     },
   },

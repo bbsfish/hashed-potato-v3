@@ -71,12 +71,10 @@ export default {
       }
       return undefined;
     },
-    getPersonalInfoByKey: (state, getters) => (key, isAll = false) => {
+    getPersonalInfoByKey: (state, getters) => (key) => {
       const info = getters.personalInfo;
-      const targets = info.filter((row) => (row.key === key));
-      if (targets.length === 0) return undefined;
-      if (!isAll) return targets[0];
-      return targets;
+      const target = info[key];
+      return target;
     },
   },
   actions: {

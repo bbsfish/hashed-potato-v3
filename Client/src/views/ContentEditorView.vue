@@ -6,7 +6,7 @@
       <SelectFileButton label="デバイスから選択" />
     </div>
     <div class="file-selecter-support">
-      <DecryptFileButton v-if="!isBlankFile&&isFileSelected" />
+      <DecryptFileButton v-if="!isBlankFile&&isFileSelected&&!isDataParsed" />
     </div>
     <ServiceTableShow
       :key="table.key"
@@ -15,8 +15,8 @@
     />
     <YouAreTableShow
       :key="table.key"
-      :source="table.personalInfo"
-      @onedit="onTableEdit"
+      :source="table.personals"
+      @onedit="({ dataType }) => showPiUpdatePrompt(dataType)"
     />
     <EditServiceWindow
       :key="edit.key"
@@ -32,18 +32,21 @@
       @submit="onSaveInPIEditor"
     />
     <div class="table-support">
-      <button v-if="isFileSelected&&isBlankFile" @click="addDataIntoBlankFile">
-        データがありません. データを追加しましょう!
-      </button>
-      <button v-if="isFileSelected&&isBlankFile" @click="addDataIntoBlankFile">
-        個人情報がありません. 情報を追加しましょう!
-      </button>
-      <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addData">
-        データを追加する
-      </button>
-      <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addYouareData">
-        個人情報を追加する
-      </button>
+      <button v-if="isFileSelected&&isBlankFile"
+        @click="addDataIntoBlankFile('Credential')">認証情報がありません. 情報を追加しましょう!</button>
+      <button v-if="isFileSelected&&!isBlankFile&&isDataParsed" @click="addData">データを追加する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('nickname')">ニックネームを更新する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('email')">メールアドレスを更新する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('phonenumber')">電話番号を更新する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('fullname')">氏名を更新する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('postcode')">郵便番号を更新する</button>
+      <button v-if="isFileSelected&&(isDataParsed||isBlankFile)"
+        @click="showPiUpdatePrompt('address')">住所を更新する</button>
     </div>
     <div class="table-action">
       <button v-if="isDataChanged&&writeModifiedFlag">
@@ -85,13 +88,13 @@ export default {
       /**
        * Watcher によって更新されるものたち
        */
-      // 1. ファイルが選択されているか
+      // ファイルが選択されているか
       isFileSelected: false,
-      // 2. データが複合化されているか
+      // データが複合化されているか
       isDataParsed: false,
-      // 3. データが空のファイルか
+      // データが空のファイルか
       isBlankFile: false,
-      // 4. データが更新されているか
+      // データが更新されているか
       isDataChanged: false,
       /**
        * XML Object の root 以下
@@ -100,12 +103,15 @@ export default {
        *  youare: object<PersonalInfosElement>[]
        * }}
        */
-      xoRoot: null,
+      xoRoot: {
+        services: { service: [] },
+        personalinfo: {},
+      },
       writeModifiedFlag: false,
       table: {
         key: 0,
         contents: null,
-        personalInfo: null,
+        personals: null,
       },
       edit: {
         targetService: null,
@@ -122,46 +128,37 @@ export default {
     };
   },
   methods: {
-    async addYouareData() {
-      const { handle } = this.$store.getters['datastore/fileState'];
-      if (!handle) return;
-      if (!this.isBlankFile) {
-        this.piPopup.body = [
-          { type: 'title', text: 'Nickname' },
-          { type: 'hidden', name: 'pi-index', value: -1 },
-          { type: 'input', name: 'pi-nickname', value: '' },
-        ];
-        this.piPopup.key += 1;
-        this.piPopup.isOpened = true;
-      }
+    // 個人情報の追加ウィンドウ表示
+    showPiUpdatePrompt(dataType) {
+      this.piPopup.body = [
+        { type: 'title', text: dataType },
+        { type: 'hidden', name: 'pi-type', value: dataType },
+        { type: 'input', name: 'pi-value', value: this.xoRoot.personalinfo[dataType] ?? '' },
+      ];
+      this.piPopup.key += 1;
+      this.piPopup.isOpened = true;
     },
+    // 個人情報の追加ウィンドウにて保存が実行されたとき
     async onSaveInPIEditor(next) {
-      const nickname = next.find((row) => row.name === 'pi-nickname');
-      const piIndex = next.find((row) => row.name === 'pi-index');
-      const index = piIndex.value;
-      if (!('youare' in this.xoRoot)) this.xoRoot.youare = { info: [] };
-      if (index === -1) {
-        this.xoRoot.youare.info.push({ nickname: nickname.value });
-      } else {
-        console.log('this.xoRoot.youare.info', this.xoRoot.youare.info, index, this.xoRoot.youare.info[index]);
-        this.xoRoot.youare.info[index].nickname = nickname.value;
-      }
+      const dataType = next.find((row) => row.name === 'pi-type');
+      const dataValue = next.find((row) => row.name === 'pi-value');
+      this.xoRoot.personalinfo[dataType.value] = dataValue.value;
+      this.tableUpdate();
+      this.isDataChanged = true;
     },
     async addData() {
-      const { handle } = this.$store.getters['datastore/fileState'];
-      if (!handle) return;
-      if (!this.isBlankFile) {
-        this.table.contents = {};
-        this.xoRoot.services.service.push({});
-        this.onTableEdit({ index: this.xoRoot.services.service.length - 1, service: {} });
-      }
+      if (this.xoRoot.services === '') this.xoRoot.services = { service: [] };
+      this.xoRoot.services.service.push({});
+      this.onTableEdit({ index: this.xoRoot.services.service.length - 1, service: {} });
     },
-    async addDataIntoBlankFile() {
-      const { handle } = this.$store.getters['datastore/fileState'];
-      if (!handle) return;
-      if (this.isBlankFile) {
-        this.table.contents = {};
-        this.xoRoot = { services: { service: [{}] }, youare: [] };
+    async addDataIntoBlankFile(dataType) {
+      // テーブル初期化
+      this.table.contents = {};
+      this.xoRoot = { services: { service: [{}] }, youare: [] };
+      if (dataType === 'Credential') {
+        this.onTableEdit({ index: 0, service: {} });
+      }
+      if (dataType === 'Personal') {
         this.onTableEdit({ index: 0, service: {} });
       }
     },
@@ -195,7 +192,7 @@ export default {
       this.$log.debug('onCancel', service);
     },
     tableUpdate() {
-      this.table.personalInfo = this.xoRoot?.youare?.info;
+      this.table.personals = this.xoRoot?.personalinfo;
       this.table.contents = this.xoRoot?.services?.service;
       this.table.key += 1;
     },

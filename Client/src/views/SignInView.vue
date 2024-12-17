@@ -80,8 +80,10 @@ export default {
           if (!service.scope || service.scope.includes('none')) {
             delete this.postData.identity;
           } else {
-            this.postData.identity = service.scope
-              .map((key) => this.$store.getters['xmlobject/getPersonalInfoByKey'](key));
+            this.postData.identity = {};
+            service.scope.forEach((key) => {
+              this.postData.identity[key] = this.$store.getters['xmlobject/getPersonalInfoByKey'](key);
+            });
           }
           return;
         }
