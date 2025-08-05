@@ -2,7 +2,11 @@
   <div class="block-wrp header-wrp">
     <div class='header-logo'>
       <router-link to='/' class="header-logo__item">
-        HASHED POTATO
+        <div>
+          <span>HASHED POTATO</span>
+          <span>FREE FROM PASSWORD</span>
+        </div>
+        <img src="/logo.svg" alt="Logo for this website" />
       </router-link>
     </div>
     <nav class='header-menu'>
@@ -53,16 +57,58 @@ export default {
     }
 
     .header-logo {
-      width: 150px;
+      $max-width: 300px;
+      $logo-width: 50px;
+      width: $max-width;
+      height: 50px;
       text-align: center;
+      &__item {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        div {
+          width: $max-width - $logo-width;
+          height: 100%;
+          span:first-child {
+            display: block;
+            position: absolute;
+            top: 0;
+            right: $logo-width + 6px;
+            font-size: 1.8rem;
+          }
+          span:last-child {
+            display: inline-block;
+            position: absolute;
+            right: $logo-width + 10px;
+            bottom: 0;
+            font-size: 0.6rem;
+          }
+        }
+        img {
+          display: block;
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: $logo-width;
+          height: $logo-width;
+        }
+      }
     }
 
     .header-menu {
-      .header-menu__outer {
+      &__outer {
         height: 100%;
         display: flex;
         gap: 1rem;
         margin: 0 1rem;
+        li {
+          display: flex;
+          align-items: center;
+          a {
+            font-size: 1.4rem;
+          }
+        }
       }
     }
   }

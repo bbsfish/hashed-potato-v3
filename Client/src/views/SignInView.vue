@@ -94,8 +94,8 @@ export default {
     /**
      * サービスが見つからなかったとき、CANCEL を POST
      */
-    onNoService() {
-      const consent = this.$dialog.confirm({
+    async onNoService() {
+      const consent = await this.$dialog.confirm({
         message: 'アカウントが見つかりません. サインアップするために、元のウェブサービスに戻りますか?',
       });
       if (consent) {

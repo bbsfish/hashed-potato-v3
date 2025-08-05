@@ -53,7 +53,14 @@ export default {
       }
     },
     addKeyOfService(state) {
-      state.xo.root.services.service = [];
+      if (state.xo.root.services === '') {
+        state.xo.root.services = { service: [] };
+      } else {
+        state.xo.root.services.service = [];
+      }
+    },
+    services(state) {
+      return state.xo.root.services;
     },
   },
   getters: {
@@ -85,7 +92,7 @@ export default {
      */
     addService: ({ getters, commit }, { id, object = {} }) => {
       const servs = (() => {
-        if ('service' in getters.services) {
+        if (getters.services !== undefined && 'service' in getters.services) {
           return getters.services.service;
         }
         commit('addKeyOfService');
